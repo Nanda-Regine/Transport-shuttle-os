@@ -1,0 +1,1614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transport Shuttle OS — Interactive Demo</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #FF6B35;
+            --primary-dark: #E55A2B;
+            --secondary: #004E89;
+            --secondary-light: #1A659E;
+            --accent: #FFC857;
+            --dark: #0A1128;
+            --dark-soft: #1E2749;
+            --gray: #6C757D;
+            --gray-light: #ADB5BD;
+            --bg: #F8F9FA;
+            --white: #FFFFFF;
+            --success: #06D6A0;
+            --warning: #FFC857;
+            --danger: #EF476F;
+            
+            --font-main: 'DM Sans', sans-serif;
+            --font-mono: 'Space Mono', monospace;
+            
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+            --shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+        }
+
+        body {
+            font-family: var(--font-main);
+            background: var(--bg);
+            color: var(--dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: var(--white);
+            padding: 1.5rem 2rem;
+            box-shadow: var(--shadow-sm);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .logo-text {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--dark);
+        }
+
+        .nav {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            color: var(--dark);
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover {
+            background: var(--bg);
+            color: var(--primary);
+        }
+
+        .nav-link.active {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .hero {
+            background: linear-gradient(135deg, var(--dark) 0%, var(--secondary) 100%);
+            padding: 4rem 2rem;
+            text-align: center;
+            color: var(--white);
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+        }
+
+        .demo-selector {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .demo-btn {
+            background: var(--white);
+            color: var(--dark);
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .demo-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .demo-btn.active {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .demo-section {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .demo-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Phone Mockup */
+        .phone-mockup {
+            width: 375px;
+            height: 812px;
+            background: var(--dark);
+            border-radius: 40px;
+            padding: 12px;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            margin: 2rem auto;
+        }
+
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            background: var(--white);
+            border-radius: 32px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .status-bar {
+            height: 44px;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .phone-content {
+            height: calc(100% - 44px);
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+
+        /* Booking Steps */
+        .booking-step {
+            display: none;
+            animation: slideIn 0.3s;
+        }
+
+        .booking-step.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .step-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .step-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-subtitle {
+            color: var(--gray);
+            font-size: 0.875rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.875rem;
+            border: 2px solid #E9ECEF;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: var(--font-main);
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .service-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .service-card {
+            padding: 1.5rem;
+            background: var(--bg);
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .service-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .service-card.selected {
+            border-color: var(--primary);
+            background: #FFF5F0;
+        }
+
+        .service-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .service-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .service-price {
+            color: var(--primary);
+            font-weight: 700;
+            font-family: var(--font-mono);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 1rem;
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        /* Dashboard Cards */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--gray);
+            font-size: 0.875rem;
+        }
+
+        .stat-trend {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+
+        .stat-trend.up {
+            background: #E8F5E9;
+            color: #2E7D32;
+        }
+
+        /* Kanban Board */
+        .kanban {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .kanban-column {
+            background: var(--bg);
+            border-radius: 12px;
+            padding: 1rem;
+        }
+
+        .kanban-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+        }
+
+        .kanban-title {
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .kanban-count {
+            background: var(--white);
+            color: var(--dark);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .kanban-card {
+            background: var(--white);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            box-shadow: var(--shadow-sm);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .kanban-card:hover {
+            box-shadow: var(--shadow);
+            transform: translateY(-2px);
+        }
+
+        .card-id {
+            color: var(--gray);
+            font-size: 0.75rem;
+            font-family: var(--font-mono);
+            margin-bottom: 0.5rem;
+        }
+
+        .card-title {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-client {
+            color: var(--gray);
+            font-size: 0.875rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .card-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.875rem;
+        }
+
+        .card-value {
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* Notion Database */
+        .notion-container {
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .notion-header {
+            background: var(--bg);
+            padding: 1.5rem;
+            border-bottom: 1px solid #E9ECEF;
+        }
+
+        .notion-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .notion-views {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .view-tab {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--gray);
+            transition: all 0.2s;
+        }
+
+        .view-tab.active {
+            background: var(--white);
+            color: var(--primary);
+        }
+
+        .notion-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .notion-table th {
+            background: var(--bg);
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--gray);
+        }
+
+        .notion-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #F1F3F5;
+        }
+
+        .notion-table tr:hover {
+            background: #FAFAFA;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: #FFF3E0;
+            color: #F57C00;
+        }
+
+        .status-confirmed {
+            background: #E3F2FD;
+            color: #1976D2;
+        }
+
+        .status-active {
+            background: #E8F5E9;
+            color: #388E3C;
+        }
+
+        .status-completed {
+            background: #F3E5F5;
+            color: #7B1FA2;
+        }
+
+        /* WhatsApp Mock */
+        .whatsapp-mock {
+            background: #ECE5DD;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .wa-message {
+            max-width: 80%;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+        }
+
+        .wa-sent {
+            background: #DCF8C6;
+            margin-left: auto;
+            border-top-right-radius: 2px;
+        }
+
+        .wa-received {
+            background: var(--white);
+            margin-right: auto;
+            border-top-left-radius: 2px;
+        }
+
+        .wa-time {
+            font-size: 0.75rem;
+            color: var(--gray);
+            text-align: right;
+            margin-top: 0.25rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .phone-mockup {
+                transform: scale(0.9);
+            }
+            
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .kanban {
+                grid-template-columns: 1fr;
+            }
+            
+            .demo-selector {
+                flex-direction: column;
+            }
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .section-subtitle {
+            font-size: 1.125rem;
+            color: var(--gray);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: start;
+        }
+
+        @media (max-width: 1024px) {
+            .demo-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .feature-list {
+            list-style: none;
+            margin-top: 2rem;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: start;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: var(--white);
+            border-radius: 8px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .feature-content h3 {
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .feature-content p {
+            color: var(--gray);
+            font-size: 0.875rem;
+        }
+
+        .route-card {
+            background: var(--white);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 1rem;
+        }
+
+        .route-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .route-name {
+            font-weight: 700;
+            font-size: 1.125rem;
+        }
+
+        .route-status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .route-details {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .route-detail {
+            text-align: center;
+            padding: 0.75rem;
+            background: var(--bg);
+            border-radius: 8px;
+        }
+
+        .route-detail-value {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--primary);
+        }
+
+        .route-detail-label {
+            font-size: 0.75rem;
+            color: var(--gray);
+            margin-top: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">🚐</div>
+                <div class="logo-text">Transport Shuttle OS</div>
+            </div>
+            <nav class="nav">
+                <a href="#" class="nav-link" onclick="showDemo('client')">📱 Client Demo</a>
+                <a href="#" class="nav-link" onclick="showDemo('admin')">⚒️ Admin Dashboard</a>
+                <a href="#" class="nav-link" onclick="showDemo('notion')">🗂️ Notion Backend</a>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero">
+        <h1>Transport Shuttle OS</h1>
+        <p>Experience the complete digital transformation system for shuttle transport businesses — from customer booking to route management to automated operations.</p>
+        
+        <div class="demo-selector">
+            <button class="demo-btn active" onclick="showDemo('client')">
+                <span>📱</span> Client Experience
+            </button>
+            <button class="demo-btn" onclick="showDemo('admin')">
+                <span>⚒️</span> Admin Dashboard
+            </button>
+            <button class="demo-btn" onclick="showDemo('notion')">
+                <span>🗂️</span> Notion Backend
+            </button>
+        </div>
+    </section>
+
+    <div class="container">
+        <!-- CLIENT DEMO -->
+        <div id="client-demo" class="demo-section active">
+            <div class="section-header">
+                <h2 class="section-title">What Your Customers Experience</h2>
+                <p class="section-subtitle">From booking their ride to tracking the shuttle in real-time — fully automated, zero phone calls required.</p>
+            </div>
+
+            <div class="demo-grid">
+                <div>
+                    <div class="phone-mockup">
+                        <div class="phone-screen">
+                            <div class="status-bar">
+                                <span>9:41</span>
+                                <span>●●●●◦ WiFi</span>
+                            </div>
+                            <div class="phone-content" id="phone-content">
+                                <!-- Booking Step 1 -->
+                                <div class="booking-step active" id="step-1">
+                                    <div class="step-header">
+                                        <h3 class="step-title">Eastern Cape Shuttle</h3>
+                                        <p class="step-subtitle">Fast, Safe, Reliable Transport</p>
+                                    </div>
+
+                                    <div class="service-grid">
+                                        <div class="service-card selected" onclick="selectService(this)">
+                                            <div class="service-icon">🏫</div>
+                                            <div class="service-name">School Run</div>
+                                            <div class="service-price">R350/week</div>
+                                        </div>
+                                        <div class="service-card" onclick="selectService(this)">
+                                            <div class="service-icon">✈️</div>
+                                            <div class="service-name">Airport Transfer</div>
+                                            <div class="service-price">From R280</div>
+                                        </div>
+                                        <div class="service-card" onclick="selectService(this)">
+                                            <div class="service-icon">💼</div>
+                                            <div class="service-name">Corporate Event</div>
+                                            <div class="service-price">Custom Quote</div>
+                                        </div>
+                                        <div class="service-card" onclick="selectService(this)">
+                                            <div class="service-icon">🎉</div>
+                                            <div class="service-name">Special Event</div>
+                                            <div class="service-price">From R450</div>
+                                        </div>
+                                    </div>
+
+                                    <button class="btn" onclick="nextStep(2)">Continue Booking →</button>
+                                </div>
+
+                                <!-- Booking Step 2 -->
+                                <div class="booking-step" id="step-2">
+                                    <div class="step-header">
+                                        <h3 class="step-title">Your Details</h3>
+                                        <p class="step-subtitle">Step 1 of 3</p>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">Full Name</label>
+                                        <input type="text" class="form-input" placeholder="Thabo Mokoena">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">WhatsApp Number</label>
+                                        <input type="tel" class="form-input" placeholder="+27 82 555 0123">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">Email Address</label>
+                                        <input type="email" class="form-input" placeholder="thabo@example.com">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">Service Type</label>
+                                        <input type="text" class="form-input" value="School Run" readonly>
+                                    </div>
+
+                                    <button class="btn" onclick="nextStep(3)">Next: Pick Route →</button>
+                                </div>
+
+                                <!-- Booking Step 3 -->
+                                <div class="booking-step" id="step-3">
+                                    <div class="step-header">
+                                        <h3 class="step-title">Select Route & Time</h3>
+                                        <p class="step-subtitle">Step 2 of 3</p>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">Pickup Location</label>
+                                        <input type="text" class="form-input" placeholder="Enter your address">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">Drop-off Location</label>
+                                        <input type="text" class="form-input" placeholder="School/Destination">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">Preferred Time</label>
+                                        <input type="time" class="form-input" value="06:30">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">Number of Passengers</label>
+                                        <input type="number" class="form-input" value="1">
+                                    </div>
+
+                                    <button class="btn" onclick="nextStep(4)">Next: Payment →</button>
+                                </div>
+
+                                <!-- Booking Step 4 -->
+                                <div class="booking-step" id="step-4">
+                                    <div class="step-header">
+                                        <h3 class="step-title">Confirm & Pay</h3>
+                                        <p class="step-subtitle">Step 3 of 3</p>
+                                    </div>
+
+                                    <div style="background: var(--bg); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem;">
+                                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                            <span>School Run (Weekly)</span>
+                                            <strong>R350</strong>
+                                        </div>
+                                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; color: var(--gray); font-size: 0.875rem;">
+                                            <span>Processing Fee</span>
+                                            <span>R15</span>
+                                        </div>
+                                        <div style="border-top: 2px solid var(--white); padding-top: 0.5rem; margin-top: 0.5rem; display: flex; justify-content: space-between; font-weight: 700; font-size: 1.125rem;">
+                                            <span>Total</span>
+                                            <span style="color: var(--primary);">R365</span>
+                                        </div>
+                                    </div>
+
+                                    <div style="background: rgba(34,197,94,0.10); padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.875rem;">
+                                        <strong>✓ Secure Payment</strong><br>
+                                        Your payment is processed securely through PayFast. No card details stored.
+                                    </div>
+
+                                    <button class="btn" onclick="nextStep(5)">Pay R365 & Confirm →</button>
+                                    <button class="btn btn-secondary" style="margin-top: 0.5rem;" onclick="nextStep(2)">← Back</button>
+                                </div>
+
+                                <!-- Booking Confirmation -->
+                                <div class="booking-step" id="step-5">
+                                    <div style="text-align: center; padding: 2rem 0;">
+                                        <div style="width: 80px; height: 80px; background: var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 3rem;">✓</div>
+                                        
+                                        <h3 class="step-title">Booking Confirmed!</h3>
+                                        <p style="color: var(--gray); margin-bottom: 2rem;">A WhatsApp confirmation is on its way</p>
+
+                                        <div style="background: var(--bg); padding: 1.5rem; border-radius: 12px; text-align: left; margin-bottom: 1.5rem;">
+                                            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                                                <span style="color: var(--gray); font-size: 0.875rem;">Booking ID</span>
+                                                <strong style="font-family: var(--font-mono);">#EC-2026-0142</strong>
+                                            </div>
+                                            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                                                <span style="color: var(--gray); font-size: 0.875rem;">Service</span>
+                                                <strong>School Run</strong>
+                                            </div>
+                                            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                                                <span style="color: var(--gray); font-size: 0.875rem;">Start Date</span>
+                                                <strong>Monday, 7 April</strong>
+                                            </div>
+                                            <div style="display: flex; justify-content: space-between;">
+                                                <span style="color: var(--gray); font-size: 0.875rem;">Amount Paid</span>
+                                                <strong style="color: var(--primary);">R365 ✓</strong>
+                                            </div>
+                                        </div>
+
+                                        <button class="btn" onclick="nextStep(6)">Track My Shuttle →</button>
+                                    </div>
+                                </div>
+
+                                <!-- Live Tracking -->
+                                <div class="booking-step" id="step-6">
+                                    <div class="step-header">
+                                        <h3 class="step-title">Live Shuttle Tracking</h3>
+                                        <p class="step-subtitle">#EC-2026-0142</p>
+                                    </div>
+
+                                    <div style="background: var(--secondary); height: 200px; border-radius: 12px; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: center; color: var(--white); position: relative; overflow: hidden;">
+                                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 3rem;">🚐</div>
+                                        <div style="position: absolute; top: 20px; left: 20px; background: rgba(255,255,255,0.9); padding: 0.5rem 1rem; border-radius: 6px; color: var(--dark); font-size: 0.875rem;">
+                                            <strong>2 mins away</strong>
+                                        </div>
+                                    </div>
+
+                                    <div style="background: var(--bg); padding: 1.5rem; border-radius: 12px; margin-bottom: 1.5rem;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                            <div>
+                                                <div style="color: var(--gray); font-size: 0.875rem;">Driver</div>
+                                                <div style="font-weight: 700;">Sipho Khumalo</div>
+                                            </div>
+                                            <div>
+                                                <div style="color: var(--gray); font-size: 0.875rem;">Vehicle</div>
+                                                <div style="font-weight: 700; font-family: var(--font-mono);">EC-XYZ-123</div>
+                                            </div>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--success); font-size: 0.875rem;">
+                                            <span>✓</span>
+                                            <span>On route • Arriving 06:28</span>
+                                        </div>
+                                    </div>
+
+                                    <div style="background: rgba(139,92,246,0.10); padding: 1rem; border-radius: 8px; font-size: 0.875rem;">
+                                        📱 You will receive a WhatsApp notification when the driver is 5 minutes away
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1.5rem;">Customer Journey Features</h3>
+                    
+                    <ul class="feature-list">
+                        <li class="feature-item">
+                            <div class="feature-icon" style="background: rgba(0,229,255,0.10); color: #00e5ff;">📱</div>
+                            <div class="feature-content">
+                                <h3>Online Booking System</h3>
+                                <p>Customers book directly from your website — no phone calls, no back-and-forth messages. Service types, routes, and pricing shown upfront.</p>
+                            </div>
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-icon" style="background: rgba(139,92,246,0.12); color: #8b5cf6;">💳</div>
+                            <div class="feature-content">
+                                <h3>Secure Online Payments</h3>
+                                <p>Instant payment via PayFast. Deposits collected automatically. No more chasing bank transfers or proof of payment.</p>
+                            </div>
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-icon" style="background: rgba(34,197,94,0.12); color: #22c55e;">📍</div>
+                            <div class="feature-content">
+                                <h3>Live Shuttle Tracking</h3>
+                                <p>Parents track the shuttle in real-time. See driver details, vehicle registration, and exact arrival time. Zero "where is the shuttle?" calls.</p>
+                            </div>
+                        </li>
+                        <li class="feature-item">
+                            <div class="feature-icon" style="background: rgba(139,92,246,0.12); color: #8b5cf6;">💬</div>
+                            <div class="feature-content">
+                                <h3>Automated WhatsApp Updates</h3>
+                                <p>Booking confirmations, payment receipts, route changes, ETA alerts — all sent automatically. Customers always informed, zero manual work.</p>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <div class="whatsapp-mock" style="margin-top: 2rem;">
+                        <div style="text-align: center; color: var(--gray); font-size: 0.875rem; margin-bottom: 1rem;">Automated WhatsApp Messages</div>
+                        
+                        <div class="wa-message wa-sent">
+                            <strong>✓ Booking Confirmed</strong><br>
+                            Hi Thabo! Your school run is confirmed starting Mon 7 April. Payment of R365 received. Driver details will be shared before first pickup! 🚐
+                            <div class="wa-time">Mon 9:41</div>
+                        </div>
+
+                        <div class="wa-message wa-sent">
+                            <strong>📍 Driver Assigned</strong><br>
+                            Your driver is Sipho Khumalo (082 555 7890). Vehicle: White Toyota Quantum, EC-XYZ-123. He will arrive at 06:25 tomorrow morning.
+                            <div class="wa-time">Sun 18:00</div>
+                        </div>
+
+                        <div class="wa-message wa-sent">
+                            <strong>⏰ Pickup in 5 Minutes</strong><br>
+                            Sipho is 5 minutes away from your pickup location. Track live at: ec-shuttle.co.za/track/142
+                            <div class="wa-time">Mon 06:20</div>
+                        </div>
+
+                        <div class="wa-message wa-received">
+                            Thank you! He just arrived 👍
+                            <div class="wa-time">Mon 06:25</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ADMIN DEMO -->
+        <div id="admin-demo" class="demo-section">
+            <div class="section-header">
+                <h2 class="section-title">Your Admin Dashboard</h2>
+                <p class="section-subtitle">Manage every booking, route, driver, and payment from one central command center.</p>
+            </div>
+
+            <div class="dashboard">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon" style="background: rgba(0,229,255,0.10); color: #00e5ff;">💰</div>
+                    </div>
+                    <div class="stat-value">R48,750</div>
+                    <div class="stat-label">Revenue This Month</div>
+                    <div class="stat-trend up">↑ 32% vs last month</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon" style="background: rgba(139,92,246,0.12); color: #8b5cf6;">🎫</div>
+                    </div>
+                    <div class="stat-value">142</div>
+                    <div class="stat-label">Active Bookings</div>
+                    <div class="stat-trend up">↑ 18 new this week</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon" style="background: rgba(34,197,94,0.12); color: #22c55e;">🚐</div>
+                    </div>
+                    <div class="stat-value">8 / 10</div>
+                    <div class="stat-label">Vehicles Active</div>
+                    <div style="color: var(--gray); font-size: 0.875rem; margin-top: 0.5rem;">2 in maintenance</div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <div class="stat-icon" style="background: rgba(245,158,11,0.12); color: #f59e0b;">📅</div>
+                    </div>
+                    <div class="stat-value">24</div>
+                    <div class="stat-label">Pending Bookings</div>
+                    <div style="color: var(--gray); font-size: 0.875rem; margin-top: 0.5rem;">Need confirmation today</div>
+                </div>
+            </div>
+
+            <div style="background: var(--white); padding: 1.5rem; border-radius: 12px; box-shadow: var(--shadow); margin-bottom: 2rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h3 style="font-weight: 700; font-size: 1.25rem;">⚡ New Booking Alert</h3>
+                    <span style="background: var(--success); color: var(--white); padding: 0.25rem 0.75rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;">LIVE</span>
+                </div>
+
+                <div style="background: var(--bg); padding: 1.25rem; border-radius: 8px; margin-bottom: 1rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                        <div>
+                            <div style="font-weight: 700; font-size: 1.125rem;">Thabo Mokoena</div>
+                            <div style="color: var(--gray); font-size: 0.875rem;">+27 82 555 0123</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-weight: 700; color: var(--primary); font-size: 1.125rem;">R365</div>
+                            <div style="color: var(--success); font-size: 0.875rem;">✓ Paid</div>
+                        </div>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+                        <div>
+                            <div style="color: var(--gray); font-size: 0.75rem;">Service</div>
+                            <div style="font-weight: 600;">School Run</div>
+                        </div>
+                        <div>
+                            <div style="color: var(--gray); font-size: 0.75rem;">Start Date</div>
+                            <div style="font-weight: 600;">Mon 7 April</div>
+                        </div>
+                        <div>
+                            <div style="color: var(--gray); font-size: 0.75rem;">Route</div>
+                            <div style="font-weight: 600;">Mthatha → St Johns</div>
+                        </div>
+                        <div>
+                            <div style="color: var(--gray); font-size: 0.75rem;">Time</div>
+                            <div style="font-weight: 600;">06:30 pickup</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                    <button class="btn">✓ Accept & Assign Driver</button>
+                    <button class="btn btn-secondary">💬 Message Customer</button>
+                </div>
+            </div>
+
+            <h3 style="font-weight: 700; font-size: 1.5rem; margin-bottom: 1.5rem;">Active Routes — Kanban View</h3>
+
+            <div class="kanban">
+                <div class="kanban-column">
+                    <div class="kanban-header">
+                        <div class="kanban-title">
+                            <span style="color: var(--warning);">●</span> Pending
+                        </div>
+                        <div class="kanban-count">6</div>
+                    </div>
+
+                    <div class="kanban-card">
+                        <div class="card-id">#EC-2026-0145</div>
+                        <div class="card-title">Airport Transfer</div>
+                        <div class="card-client">Nomsa Dube • +27 83 444 5555</div>
+                        <div class="card-meta">
+                            <span>Tomorrow 14:00</span>
+                            <span class="card-value">R380</span>
+                        </div>
+                    </div>
+
+                    <div class="kanban-card">
+                        <div class="card-id">#EC-2026-0144</div>
+                        <div class="card-title">Corporate Event</div>
+                        <div class="card-client">Lerato Corp • +27 11 333 4444</div>
+                        <div class="card-meta">
+                            <span>12 April</span>
+                            <span class="card-value">R2,450</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="kanban-column">
+                    <div class="kanban-header">
+                        <div class="kanban-title">
+                            <span style="color: var(--secondary);">●</span> Confirmed
+                        </div>
+                        <div class="kanban-count">18</div>
+                    </div>
+
+                    <div class="kanban-card">
+                        <div class="card-id">#EC-2026-0143</div>
+                        <div class="card-title">School Run (Weekly)</div>
+                        <div class="card-client">Zanele Mokoena • +27 79 222 8888</div>
+                        <div class="card-meta">
+                            <span>Mon-Fri 06:30</span>
+                            <span class="card-value">R350/wk</span>
+                        </div>
+                    </div>
+
+                    <div class="kanban-card">
+                        <div class="card-id">#EC-2026-0142</div>
+                        <div class="card-title">School Run (Weekly)</div>
+                        <div class="card-client">Thabo Mokoena • +27 82 555 0123</div>
+                        <div class="card-meta">
+                            <span>Mon-Fri 06:30</span>
+                            <span class="card-value">R365/wk</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="kanban-column">
+                    <div class="kanban-header">
+                        <div class="kanban-title">
+                            <span style="color: var(--success);">●</span> Active
+                        </div>
+                        <div class="kanban-count">12</div>
+                    </div>
+
+                    <div class="kanban-card">
+                        <div class="card-id">#EC-2026-0141</div>
+                        <div class="card-title">Airport Transfer</div>
+                        <div class="card-client">Priya Naidoo • +27 71 888 2233</div>
+                        <div class="card-meta">
+                            <span>In transit</span>
+                            <span class="card-value" style="color: var(--success);">Live 🟢</span>
+                        </div>
+                    </div>
+
+                    <div class="kanban-card">
+                        <div class="card-id">#EC-2026-0139</div>
+                        <div class="card-title">Special Event</div>
+                        <div class="card-client">Wedding Party • +27 82 999 1111</div>
+                        <div class="card-meta">
+                            <span>Picking up</span>
+                            <span class="card-value" style="color: var(--success);">Live 🟢</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="kanban-column">
+                    <div class="kanban-header">
+                        <div class="kanban-title">
+                            <span style="color: var(--gray);">●</span> Completed
+                        </div>
+                        <div class="kanban-count">8</div>
+                    </div>
+
+                    <div class="kanban-card">
+                        <div class="card-id">#EC-2026-0138</div>
+                        <div class="card-title">Airport Transfer</div>
+                        <div class="card-client">Ayanda Mthembu • +27 83 222 7777</div>
+                        <div class="card-meta">
+                            <span>Completed</span>
+                            <span style="color: var(--success); font-size: 0.875rem;">⭐ 5.0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 3rem;">
+                <h3 style="font-weight: 700; font-size: 1.5rem; margin-bottom: 1.5rem;">Route Performance</h3>
+                
+                <div class="route-card">
+                    <div class="route-header">
+                        <div class="route-name">🏫 School Run Route A</div>
+                        <div class="route-status" style="background: rgba(34,197,94,0.12); color: #22c55e;">Active • 28 Students</div>
+                    </div>
+                    <div style="color: var(--gray); margin-bottom: 1rem; font-size: 0.875rem;">Mthatha CBD → St Johns College → Return</div>
+                    <div class="route-details">
+                        <div class="route-detail">
+                            <div class="route-detail-value">R9,800</div>
+                            <div class="route-detail-label">Monthly Revenue</div>
+                        </div>
+                        <div class="route-detail">
+                            <div class="route-detail-value">45 min</div>
+                            <div class="route-detail-label">Avg Journey</div>
+                        </div>
+                        <div class="route-detail">
+                            <div class="route-detail-value">98%</div>
+                            <div class="route-detail-label">On-Time Rate</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="route-card">
+                    <div class="route-header">
+                        <div class="route-name">✈️ Airport Express</div>
+                        <div class="route-status" style="background: rgba(139,92,246,0.12); color: #8b5cf6;">Active • On-Demand</div>
+                    </div>
+                    <div style="color: var(--gray); margin-bottom: 1rem; font-size: 0.875rem;">Mthatha → Port Elizabeth Airport</div>
+                    <div class="route-details">
+                        <div class="route-detail">
+                            <div class="route-detail-value">R12,400</div>
+                            <div class="route-detail-label">Monthly Revenue</div>
+                        </div>
+                        <div class="route-detail">
+                            <div class="route-detail-value">2.5 hr</div>
+                            <div class="route-detail-label">Journey Time</div>
+                        </div>
+                        <div class="route-detail">
+                            <div class="route-detail-value">4.9★</div>
+                            <div class="route-detail-label">Avg Rating</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- NOTION DEMO -->
+        <div id="notion-demo" class="demo-section">
+            <div class="section-header">
+                <h2 class="section-title">Your Notion Backend</h2>
+                <p class="section-subtitle">Every booking, route, driver, customer, and payment organized in one powerful workspace.</p>
+            </div>
+
+            <div class="notion-container">
+                <div class="notion-header">
+                    <div class="notion-title">🎫 Bookings Database</div>
+                    <p style="color: var(--gray); font-size: 0.875rem;">All customer bookings with payment status, route assignment, and tracking</p>
+                    <div class="notion-views">
+                        <button class="view-tab active">☰ Table</button>
+                        <button class="view-tab">⬜ Board</button>
+                        <button class="view-tab">📅 Calendar</button>
+                    </div>
+                </div>
+
+                <table class="notion-table">
+                    <thead>
+                        <tr>
+                            <th>Booking ID</th>
+                            <th>Customer</th>
+                            <th>Service</th>
+                            <th>Route</th>
+                            <th>Date/Time</th>
+                            <th>Amount</th>
+                            <th>Payment</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><span style="font-family: var(--font-mono); font-size: 0.875rem;">#EC-2026-0145</span></td>
+                            <td><strong>Nomsa Dube</strong><br><span style="color: var(--gray); font-size: 0.875rem;">+27 83 444 5555</span></td>
+                            <td>✈️ Airport Transfer</td>
+                            <td>Mthatha → PE Airport</td>
+                            <td>Tomorrow 14:00</td>
+                            <td><strong>R380</strong></td>
+                            <td><span class="status-badge" style="background: rgba(34,197,94,0.12); color: #22c55e;">✓ Paid</span></td>
+                            <td><span class="status-badge status-pending">Pending</span></td>
+                        </tr>
+                        <tr>
+                            <td><span style="font-family: var(--font-mono); font-size: 0.875rem;">#EC-2026-0144</span></td>
+                            <td><strong>Lerato Corp</strong><br><span style="color: var(--gray); font-size: 0.875rem;">+27 11 333 4444</span></td>
+                            <td>💼 Corporate Event</td>
+                            <td>Custom Route</td>
+                            <td>12 April, Full Day</td>
+                            <td><strong>R2,450</strong></td>
+                            <td><span class="status-badge" style="background: rgba(245,158,11,0.12); color: #f59e0b;">50% Deposit</span></td>
+                            <td><span class="status-badge status-confirmed">Confirmed</span></td>
+                        </tr>
+                        <tr>
+                            <td><span style="font-family: var(--font-mono); font-size: 0.875rem;">#EC-2026-0143</span></td>
+                            <td><strong>Zanele Mokoena</strong><br><span style="color: var(--gray); font-size: 0.875rem;">+27 79 222 8888</span></td>
+                            <td>🏫 School Run</td>
+                            <td>Route A (Weekly)</td>
+                            <td>Mon-Fri 06:30</td>
+                            <td><strong>R350/wk</strong></td>
+                            <td><span class="status-badge" style="background: rgba(34,197,94,0.12); color: #22c55e;">✓ Paid</span></td>
+                            <td><span class="status-badge status-confirmed">Confirmed</span></td>
+                        </tr>
+                        <tr>
+                            <td><span style="font-family: var(--font-mono); font-size: 0.875rem;">#EC-2026-0142</span></td>
+                            <td><strong>Thabo Mokoena</strong><br><span style="color: var(--gray); font-size: 0.875rem;">+27 82 555 0123</span></td>
+                            <td>🏫 School Run</td>
+                            <td>Route A (Weekly)</td>
+                            <td>Mon-Fri 06:30</td>
+                            <td><strong>R365/wk</strong></td>
+                            <td><span class="status-badge" style="background: rgba(34,197,94,0.12); color: #22c55e;">✓ Paid</span></td>
+                            <td><span class="status-badge status-active">Active</span></td>
+                        </tr>
+                        <tr>
+                            <td><span style="font-family: var(--font-mono); font-size: 0.875rem;">#EC-2026-0141</span></td>
+                            <td><strong>Priya Naidoo</strong><br><span style="color: var(--gray); font-size: 0.875rem;">+27 71 888 2233</span></td>
+                            <td>✈️ Airport Transfer</td>
+                            <td>Mthatha → PE Airport</td>
+                            <td>Today 08:00</td>
+                            <td><strong>R380</strong></td>
+                            <td><span class="status-badge" style="background: rgba(34,197,94,0.12); color: #22c55e;">✓ Paid</span></td>
+                            <td><span class="status-badge status-active">In Transit 🟢</span></td>
+                        </tr>
+                        <tr>
+                            <td><span style="font-family: var(--font-mono); font-size: 0.875rem;">#EC-2026-0138</span></td>
+                            <td><strong>Ayanda Mthembu</strong><br><span style="color: var(--gray); font-size: 0.875rem;">+27 83 222 7777</span></td>
+                            <td>✈️ Airport Transfer</td>
+                            <td>Mthatha → PE Airport</td>
+                            <td>Yesterday 15:00</td>
+                            <td><strong>R380</strong></td>
+                            <td><span class="status-badge" style="background: rgba(34,197,94,0.12); color: #22c55e;">✓ Paid</span></td>
+                            <td><span class="status-badge status-completed">Completed ⭐</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 2rem;">
+                <div class="notion-container">
+                    <div class="notion-header">
+                        <div class="notion-title">🚐 Vehicles</div>
+                        <p style="color: var(--gray); font-size: 0.875rem;">Fleet management with maintenance tracking</p>
+                    </div>
+                    <table class="notion-table">
+                        <thead>
+                            <tr>
+                                <th>Vehicle</th>
+                                <th>Driver</th>
+                                <th>Status</th>
+                                <th>Next Service</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>EC-XYZ-123</strong><br><span style="color: var(--gray); font-size: 0.875rem;">Toyota Quantum</span></td>
+                                <td>Sipho K.</td>
+                                <td><span class="status-badge status-active">Active</span></td>
+                                <td>May 15</td>
+                            </tr>
+                            <tr>
+                                <td><strong>EC-ABC-456</strong><br><span style="color: var(--gray); font-size: 0.875rem;">Mercedes Sprinter</span></td>
+                                <td>Thandi M.</td>
+                                <td><span class="status-badge status-active">Active</span></td>
+                                <td>Jun 2</td>
+                            </tr>
+                            <tr>
+                                <td><strong>EC-LMN-789</strong><br><span style="color: var(--gray); font-size: 0.875rem;">Ford Transit</span></td>
+                                <td>—</td>
+                                <td><span class="status-badge" style="background: #FFEBEE; color: #C62828;">Maintenance</span></td>
+                                <td>Apr 8 ⚠️</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="notion-container">
+                    <div class="notion-header">
+                        <div class="notion-title">💰 Revenue Tracker</div>
+                        <p style="color: var(--gray); font-size: 0.875rem;">Monthly income and profit margins</p>
+                    </div>
+                    <table class="notion-table">
+                        <thead>
+                            <tr>
+                                <th>Month</th>
+                                <th>Revenue</th>
+                                <th>Expenses</th>
+                                <th>Profit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>April 2026</strong><br><span style="color: var(--gray); font-size: 0.75rem;">(current)</span></td>
+                                <td><strong>R48,750</strong></td>
+                                <td>R18,200</td>
+                                <td style="color: var(--success); font-weight: 700;">R30,550</td>
+                            </tr>
+                            <tr>
+                                <td><strong>March 2026</strong></td>
+                                <td><strong>R37,000</strong></td>
+                                <td>R14,800</td>
+                                <td style="color: var(--success); font-weight: 700;">R22,200</td>
+                            </tr>
+                            <tr>
+                                <td><strong>February 2026</strong></td>
+                                <td><strong>R32,500</strong></td>
+                                <td>R13,100</td>
+                                <td style="color: var(--success); font-weight: 700;">R19,400</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="notion-container" style="margin-top: 2rem;">
+                <div class="notion-header">
+                    <div class="notion-title">⚡ Automations Log</div>
+                    <p style="color: var(--gray); font-size: 0.875rem;">Every automated action the system has performed — WhatsApp messages, job creation, payment confirmations</p>
+                </div>
+                <table class="notion-table">
+                    <thead>
+                        <tr>
+                            <th>Trigger</th>
+                            <th>Action Taken</th>
+                            <th>Customer</th>
+                            <th>Status</th>
+                            <th>Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>📅 New Booking</td>
+                            <td>Job created • WA confirmation sent • Email sent</td>
+                            <td>Thabo Mokoena</td>
+                            <td><span class="status-badge" style="background: rgba(34,197,94,0.12); color: #22c55e;">Success</span></td>
+                            <td>5 Apr 09:41</td>
+                        </tr>
+                        <tr>
+                            <td>💳 Payment Cleared</td>
+                            <td>Booking marked paid • Receipt sent • Driver assigned</td>
+                            <td>Thabo Mokoena</td>
+                            <td><span class="status-badge" style="background: rgba(34,197,94,0.12); color: #22c55e;">Success</span></td>
+                            <td>5 Apr 09:42</td>
+                        </tr>
+                        <tr>
+                            <td>⏰ 24hr Reminder</td>
+                            <td>Pickup reminder WhatsApp sent</td>
+                            <td>Thabo Mokoena</td>
+                            <td><span class="status-badge" style="background: rgba(34,197,94,0.12); color: #22c55e;">Success</span></td>
+                            <td>6 Apr 18:00</td>
+                        </tr>
+                        <tr>
+                            <td>📍 Driver En Route</td>
+                            <td>5-min warning WhatsApp sent • Tracking link shared</td>
+                            <td>Priya Naidoo</td>
+                            <td><span class="status-badge" style="background: rgba(34,197,94,0.12); color: #22c55e;">Success</span></td>
+                            <td>5 Apr 07:55</td>
+                        </tr>
+                        <tr>
+                            <td>✓ Trip Completed</td>
+                            <td>Completion WhatsApp • Review request sent</td>
+                            <td>Ayanda Mthembu</td>
+                            <td><span class="status-badge" style="background: rgba(34,197,94,0.12); color: #22c55e;">Success</span></td>
+                            <td>4 Apr 16:30</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="background: var(--white); padding: 2rem; border-radius: 12px; box-shadow: var(--shadow); margin-top: 2rem;">
+                <h3 style="font-weight: 700; font-size: 1.25rem; margin-bottom: 1.5rem;">What This System Gives You</h3>
+                
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem;">
+                    <div>
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">⏱</div>
+                        <div style="font-weight: 700; margin-bottom: 0.25rem;">Zero Admin Hours</div>
+                        <div style="color: var(--gray); font-size: 0.875rem;">Confirmations, reminders, tracking updates all send automatically. You drive — the system handles communication.</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">📊</div>
+                        <div style="font-weight: 700; margin-bottom: 0.25rem;">Real Intelligence</div>
+                        <div style="color: var(--gray); font-size: 0.875rem;">Route profitability, customer lifetime value, on-time performance — data that drives decisions, not guesswork.</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 2rem; margin-bottom: 0.5rem;">🚀</div>
+                        <div style="font-weight: 700; margin-bottom: 0.25rem;">No Competition</div>
+                        <div style="color: var(--gray); font-size: 0.875rem;">While competitors book by phone and chase payments, you're running an automated, AI-powered transport business.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        
+        function showDemo(demo) {
+            // Hide all demos
+            document.querySelectorAll('.demo-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Show selected demo
+            document.getElementById(demo + '-demo').classList.add('active');
+            
+            // Update nav links
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            event.target.closest('.nav-link')?.classList.add('active');
+            
+            // Update demo buttons
+            document.querySelectorAll('.demo-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.closest('.demo-btn')?.classList.add('active');
+        }
+        
+        function nextStep(step) {
+            // Hide current step
+            document.querySelectorAll('.booking-step').forEach(s => {
+                s.classList.remove('active');
+            });
+            
+            // Show next step
+            document.getElementById('step-' + step).classList.add('active');
+            currentStep = step;
+            
+            // Scroll to top of phone
+            document.getElementById('phone-content').scrollTop = 0;
+        }
+        
+        function selectService(card) {
+            // Remove selected from all cards
+            document.querySelectorAll('.service-card').forEach(c => {
+                c.classList.remove('selected');
+            });
+            
+            // Add selected to clicked card
+            card.classList.add('selected');
+        }
+    </script>
+</body>
+</html> 

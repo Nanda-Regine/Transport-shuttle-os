@@ -380,12 +380,16 @@ footer {
 }
 @media(max-width:768px){
   .mobile-bottom-nav { display:flex; }
+  body { padding-bottom:70px; }
   header { flex-wrap:wrap; gap:12px; padding-top:32px; }
-  .wrap  { padding-bottom:70px; }
 }
 @media(max-width:480px){
   header { flex-direction:column; align-items:flex-start; }
-  .header-badge { align-self:flex-start; }
+  .header-badge { align-self:flex-start; white-space:normal; max-width:100%; }
+  .wrap { padding:0 20px; }
+  .hero { padding:48px 0 40px; }
+  .hero-title { font-size:clamp(2.2rem, 10vw, 3.5rem); }
+  .section-label { padding:28px 0 14px; }
 }
 .mbn-item {
   flex:1; display:flex; flex-direction:column; align-items:center;
@@ -463,7 +467,7 @@ footer {
     </a>
 
     <!-- CARD 2: LIVE DASHBOARD & CHATBOT -->
-    <a class="pres-card" href="proposal.html#dashboard">
+    <a class="pres-card" href="demo.html">
       <div class="card-glow"></div>
       <div class="card-visual">
         <div class="card-visual-bg" style="background:linear-gradient(135deg,#001a14,#03050a);"></div>
@@ -473,13 +477,13 @@ footer {
       </div>
       <div class="card-body">
         <div class="card-num">Section 02 of 04</div>
-        <div class="card-title">AI Chatbot & Live Dashboard</div>
-        <div class="card-desc">Interact with the AI chatbot exactly as your customers would — school transport, airport transfers, corporate events. Then explore the live analytics dashboard with real revenue data.</div>
+        <div class="card-title">Interactive Demo Suite</div>
+        <div class="card-desc">Three live demos in one: the full customer booking experience, the admin dashboard with kanban & revenue, and the Notion backend — all fully clickable.</div>
         <div class="card-footer">
           <div class="card-pills">
-            <span class="card-pill">Chatbot Demo</span>
-            <span class="card-pill">Live Data</span>
-            <span class="card-pill">6 Views</span>
+            <span class="card-pill">Client Flow</span>
+            <span class="card-pill">Admin</span>
+            <span class="card-pill">Notion</span>
           </div>
           <div class="card-arrow">↗</div>
         </div>
@@ -586,7 +590,7 @@ footer {
     <span class="mbn-icon">📊</span>
     <span class="mbn-label">Proposal</span>
   </a>
-  <a href="proposal.html#dashboard" class="mbn-item">
+  <a href="demo.html" class="mbn-item">
     <span class="mbn-icon">📱</span>
     <span class="mbn-label">Demo</span>
   </a>
