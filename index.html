@@ -3,1606 +3,611 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Transport Shuttle OS — Digital Transformation Proposal</title>
+<title>Transport Shuttle OS — Mirembe Muse</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #03050a;
-  --bg2: #080c14;
-  --bg3: #0d1220;
-  --cyan: #00e5ff;
-  --teal: #00c4a7;
+  --bg:     #03050a;
+  --surface:#080c14;
+  --card:   #0d1220;
+  --border: rgba(0,229,255,0.08);
+  --border2:rgba(0,229,255,0.14);
+  --cyan:   #00e5ff;
+  --teal:   #00c4a7;
   --purple: #8b5cf6;
-  --gold: #f59e0b;
-  --red: #ff4d6a;
-  --text: #e8edf5;
-  --muted: #5a6a88;
-  --border: rgba(0,229,255,0.1);
-  --glow: rgba(0,229,255,0.12);
+  --gold:   #f59e0b;
+  --text:   #e8edf5;
+  --muted:  #5a6a88;
+  --muted2: #8a9ab8;
+  --glow-c: rgba(0,229,255,0.10);
+  --glow-p: rgba(139,92,246,0.08);
 }
+
 * { margin:0; padding:0; box-sizing:border-box; }
 html { scroll-behavior:smooth; }
+
 body {
-  background:var(--bg);
-  color:var(--text);
-  font-family:'DM Mono', monospace;
-  overflow-x:hidden;
-  min-height:100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  min-height: 100vh;
+  overflow-x: hidden;
 }
+
+/* ── GRAIN OVERLAY ── */
 body::before {
   content:'';
-  position:fixed; inset:0;
-  background:
-    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(0,196,167,0.06) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 50% at 80% 80%, rgba(139,92,246,0.07) 0%, transparent 60%),
-    radial-gradient(ellipse 40% 40% at 50% 50%, rgba(0,229,255,0.03) 0%, transparent 70%);
-  pointer-events:none; z-index:0;
+  position:fixed; inset:0; z-index:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none; opacity:0.35;
 }
+
+/* ── AMBIENT GLOW ORBS ── */
+.glow-orb {
+  position:fixed; border-radius:50%;
+  filter:blur(120px); pointer-events:none; z-index:0;
+  animation:orb-drift 14s ease-in-out infinite;
+}
+.glow-1 { width:500px; height:500px; background:var(--glow-c); top:-120px; right:-120px; animation-delay:0s; }
+.glow-2 { width:350px; height:350px; background:var(--glow-p); bottom:80px;  left:-80px;  animation-delay:-7s; }
+
+@keyframes orb-drift {
+  0%,100% { transform:translate(0,0); }
+  50%      { transform:translate(24px,32px); }
+}
+
+/* ── SCROLL PROGRESS ── */
+.scroll-bar {
+  position:fixed; top:0; left:0; height:2px;
+  background:linear-gradient(90deg, var(--teal), var(--cyan), var(--purple));
+  z-index:100; transition:width 0.1s linear; width:0%;
+}
+
+/* ── GRID BG ── */
 .grid-bg {
   position:fixed; inset:0; pointer-events:none; z-index:0;
   background-image:
-    linear-gradient(rgba(0,229,255,0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,229,255,0.025) 1px, transparent 1px);
+    linear-gradient(rgba(0,229,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,255,0.02) 1px, transparent 1px);
   background-size:60px 60px;
 }
 
-/* ===== NAV ===== */
-nav {
-  position:fixed; top:0; left:0; right:0; z-index:100;
+/* ── WRAP ── */
+.wrap {
+  position:relative; z-index:1;
+  max-width:900px; margin:0 auto;
+  padding:0 32px;
+}
+
+/* ── HEADER ── */
+header {
+  padding:48px 0 0;
   display:flex; align-items:center; justify-content:space-between;
-  padding:0 40px; height:64px;
-  background:rgba(3,5,10,0.85);
-  backdrop-filter:blur(20px);
-  border-bottom:1px solid var(--border);
 }
-.nav-logo {
+.mm-logo {
   display:flex; align-items:center; gap:10px;
-  font-family:'Syne', sans-serif; font-weight:800; font-size:15px;
-  letter-spacing:0.05em; color:var(--cyan);
 }
-.nav-logo-icon {
-  width:28px; height:28px;
+.mm-mark {
+  width:32px; height:32px; border-radius:8px;
   background:linear-gradient(135deg, var(--cyan), var(--teal));
-  border-radius:6px;
   display:flex; align-items:center; justify-content:center;
-  font-size:13px;
+  font-family:'Syne', sans-serif;
+  font-size:0.7rem; font-weight:800; color:#000;
+  letter-spacing:-0.02em;
 }
-.nav-tabs { display:flex; gap:4px; }
-.nav-tab {
-  padding:6px 16px; border-radius:6px; border:none;
-  background:transparent; color:var(--muted);
-  font-family:'DM Mono', monospace; font-size:12px; cursor:pointer;
-  transition:all .2s; letter-spacing:0.05em;
+.mm-name {
+  font-family:'Syne', sans-serif;
+  font-size:0.85rem; font-weight:700; color:var(--cyan);
+  letter-spacing:0.1em; text-transform:uppercase;
 }
-.nav-tab:hover { color:var(--text); background:rgba(255,255,255,0.04); }
-.nav-tab.active { color:var(--cyan); background:rgba(0,229,255,0.08); }
-.nav-badge {
-  padding:4px 12px; border-radius:20px;
-  background:rgba(0,229,255,0.08);
-  border:1px solid rgba(0,229,255,0.2);
-  font-size:11px; color:var(--cyan); letter-spacing:0.08em;
-}
-
-/* ===== HERO ===== */
-.hero {
-  min-height:100vh; display:flex; flex-direction:column;
-  align-items:center; justify-content:center;
-  padding:80px 40px 60px; position:relative; z-index:1;
-  text-align:center;
-}
-.hero-tag {
-  display:inline-flex; align-items:center; gap:8px;
-  padding:6px 16px; border-radius:20px;
-  border:1px solid rgba(0,196,167,0.3);
-  background:rgba(0,196,167,0.06);
-  font-size:11px; color:var(--teal); letter-spacing:0.12em;
-  margin-bottom:32px;
-}
-.hero-tag span { width:6px; height:6px; border-radius:50%; background:var(--teal); animation:pulse 2s infinite; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
-.hero h1 {
-  font-family:'Syne', sans-serif; font-weight:800;
-  font-size:clamp(42px, 8vw, 96px);
-  line-height:1; letter-spacing:-0.03em;
-  margin-bottom:8px;
-}
-.hero h1 .line1 { color:var(--text); }
-.hero h1 .line2 {
-  background:linear-gradient(90deg, var(--cyan), var(--teal));
-  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-}
-.hero-sub {
-  font-family:'Instrument Serif', serif; font-style:italic;
-  font-size:clamp(16px, 2.5vw, 22px);
-  color:var(--muted); margin:20px 0 48px;
-  max-width:500px;
-}
-.hero-stats {
-  display:flex; gap:48px; justify-content:center;
-  margin-bottom:60px; flex-wrap:wrap;
-}
-.hero-stat { text-align:center; }
-.hero-stat-val {
-  font-family:'Syne', sans-serif; font-size:32px; font-weight:800;
-  background:linear-gradient(135deg, var(--cyan), var(--teal));
-  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-  display:block;
-}
-.hero-stat-label { font-size:10px; color:var(--muted); letter-spacing:0.1em; }
-.hero-cta-row { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
-.btn-primary {
-  padding:14px 32px; border-radius:8px; border:none; cursor:pointer;
-  background:linear-gradient(135deg, var(--cyan), var(--teal));
-  color:#03050a; font-family:'Syne', sans-serif; font-weight:700;
-  font-size:13px; letter-spacing:0.05em;
-  transition:all .2s; box-shadow:0 0 30px rgba(0,229,255,0.2);
-}
-.btn-primary:hover { transform:translateY(-2px); box-shadow:0 0 50px rgba(0,229,255,0.35); }
-.btn-outline {
-  padding:14px 32px; border-radius:8px; cursor:pointer;
-  background:transparent;
-  border:1px solid rgba(0,229,255,0.25);
-  color:var(--cyan); font-family:'Syne', sans-serif; font-weight:600;
-  font-size:13px; letter-spacing:0.05em;
-  transition:all .2s;
-}
-.btn-outline:hover { background:rgba(0,229,255,0.06); border-color:rgba(0,229,255,0.5); }
-.scroll-hint {
-  position:absolute; bottom:32px;
-  display:flex; flex-direction:column; align-items:center; gap:8px;
-  color:var(--muted); font-size:10px; letter-spacing:0.1em;
-  animation:bounce 2.5s infinite;
-}
-@keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(6px)} }
-.scroll-line { width:1px; height:40px; background:linear-gradient(var(--teal), transparent); }
-
-/* ===== SECTION WRAPPER ===== */
-.section { padding:100px 40px; max-width:1200px; margin:0 auto; position:relative; z-index:1; }
-.section-label {
-  font-size:10px; letter-spacing:0.18em; color:var(--teal);
-  margin-bottom:16px; display:flex; align-items:center; gap:12px;
-}
-.section-label::before { content:''; width:30px; height:1px; background:var(--teal); }
-.section-title {
-  font-family:'Syne', sans-serif; font-weight:800;
-  font-size:clamp(28px, 5vw, 52px);
-  line-height:1.1; letter-spacing:-0.02em;
-}
-.section-title em { font-family:'Instrument Serif', serif; font-style:italic; color:var(--cyan); }
-
-/* ===== TIER TOGGLE ===== */
-.tier-toggle {
-  display:flex; gap:0; border-radius:10px; overflow:hidden;
-  border:1px solid var(--border); width:fit-content; margin:40px auto;
-}
-.tier-btn {
-  padding:14px 40px; border:none; cursor:pointer;
-  font-family:'Syne', sans-serif; font-weight:700; font-size:13px;
-  letter-spacing:0.05em; transition:all .25s;
-  background:transparent; color:var(--muted);
-}
-.tier-btn.t2.active {
-  background:linear-gradient(135deg, rgba(0,229,255,0.15), rgba(0,196,167,0.1));
-  color:var(--cyan);
-}
-.tier-btn.t3.active {
-  background:linear-gradient(135deg, rgba(139,92,246,0.2), rgba(245,158,11,0.1));
-  color:var(--purple);
-}
-.tier-btn:not(.active):hover { background:rgba(255,255,255,0.03); color:var(--text); }
-
-/* ===== PHASE TIMELINE ===== */
-.timeline {
-  display:grid; grid-template-columns:1fr; gap:2px;
-  margin-top:60px;
-}
-.phase-card {
-  border:1px solid var(--border); border-radius:12px;
-  overflow:hidden; transition:all .3s; cursor:pointer;
-  background:var(--bg2);
-}
-.phase-card:hover { border-color:rgba(0,229,255,0.25); }
-.phase-card.open { border-color:rgba(0,229,255,0.3); }
-.phase-header {
-  display:flex; align-items:center; gap:20px; padding:24px 28px;
-  position:relative;
-}
-.phase-num {
-  font-family:'Syne', sans-serif; font-size:11px; font-weight:700;
-  letter-spacing:0.15em; color:var(--muted);
-  width:60px; flex-shrink:0;
-}
-.phase-icon {
-  width:44px; height:44px; border-radius:10px; flex-shrink:0;
-  display:flex; align-items:center; justify-content:center; font-size:20px;
-}
-.phase-title {
-  font-family:'Syne', sans-serif; font-size:18px; font-weight:700;
-}
-.phase-meta { margin-left:auto; text-align:right; }
-.phase-badge {
-  display:inline-block; padding:3px 10px; border-radius:20px;
-  font-size:10px; letter-spacing:0.08em; font-weight:700;
-}
-.phase-timeline-label { font-size:10px; color:var(--muted); margin-top:4px; }
-.phase-chevron {
-  margin-left:16px; color:var(--muted); font-size:18px;
-  transition:transform .3s;
-}
-.phase-card.open .phase-chevron { transform:rotate(180deg); color:var(--cyan); }
-.phase-body {
-  max-height:0; overflow:hidden; transition:max-height .45s ease;
-  padding:0 28px;
-}
-.phase-card.open .phase-body { max-height:2000px; padding-bottom:28px; }
-.feature-grid {
-  display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));
-  gap:16px; margin-top:16px;
-}
-.feature-tile {
-  border:1px solid rgba(255,255,255,0.06); border-radius:10px;
-  padding:20px; background:rgba(255,255,255,0.02);
-  transition:all .2s; cursor:pointer;
-}
-.feature-tile:hover { border-color:rgba(0,229,255,0.2); background:rgba(0,229,255,0.03); transform:translateY(-2px); }
-.feature-tile-icon { font-size:22px; margin-bottom:10px; }
-.feature-tile-title {
-  font-family:'Syne', sans-serif; font-size:13px; font-weight:700;
-  margin-bottom:6px; color:var(--text);
-}
-.feature-tile-desc { font-size:11px; color:var(--muted); line-height:1.7; }
-.feature-tile-tag {
-  display:inline-block; margin-top:10px; padding:2px 8px;
-  border-radius:4px; font-size:10px; letter-spacing:0.06em;
-}
-
-/* ===== PRICING ===== */
-.pricing-section { padding:100px 40px; position:relative; z-index:1; }
-.pricing-grid {
-  display:grid; grid-template-columns:1fr 1fr; gap:24px;
-  max-width:1000px; margin:60px auto 0;
-}
-@media(max-width:700px){ .pricing-grid{ grid-template-columns:1fr; } }
-.price-card {
-  border-radius:16px; padding:40px; position:relative; overflow:hidden;
-  border:1px solid var(--border);
-  background:var(--bg2);
-  transition:transform .3s;
-}
-.price-card:hover { transform:translateY(-4px); }
-.price-card.featured {
-  border-color:rgba(139,92,246,0.4);
-  background:linear-gradient(135deg, rgba(139,92,246,0.08), rgba(245,158,11,0.04));
-}
-.price-card.featured::before {
-  content:'RECOMMENDED';
-  position:absolute; top:20px; right:-30px;
-  background:linear-gradient(135deg, var(--purple), var(--gold));
-  color:#fff; font-size:9px; font-weight:700; letter-spacing:0.12em;
-  padding:5px 40px; transform:rotate(35deg);
-}
-.price-tier { font-size:10px; letter-spacing:0.15em; color:var(--muted); margin-bottom:12px; }
-.price-name {
-  font-family:'Syne', sans-serif; font-size:28px; font-weight:800;
-  margin-bottom:4px;
-}
-.price-tagline { font-size:12px; color:var(--muted); margin-bottom:32px; font-style:italic; }
-.price-amount {
-  font-family:'Syne', sans-serif; font-size:48px; font-weight:800; line-height:1;
-}
-.price-amount sup { font-size:20px; vertical-align:top; margin-top:8px; }
-.price-period { font-size:11px; color:var(--muted); margin:4px 0 8px; }
-.price-value-line {
-  display:flex; align-items:center; gap:8px;
-  font-size:11px; color:var(--muted); margin-bottom:28px;
-}
-.price-value-line s { color:var(--red); opacity:.7; }
-.price-value-line strong { color:var(--teal); }
-.price-divider { height:1px; background:var(--border); margin:20px 0; }
-.price-feature {
-  display:flex; align-items:flex-start; gap:10px;
-  font-size:11px; color:var(--muted); margin-bottom:10px; line-height:1.6;
-}
-.price-feature .check { color:var(--teal); flex-shrink:0; margin-top:1px; }
-.price-feature span { color:var(--text); }
-.price-cta {
-  width:100%; padding:14px; border-radius:8px; border:none; cursor:pointer;
-  font-family:'Syne', sans-serif; font-weight:700; font-size:13px;
-  letter-spacing:0.05em; margin-top:28px; transition:all .2s;
-}
-.price-cta.t2 {
-  background:linear-gradient(135deg, var(--cyan), var(--teal));
-  color:#03050a; box-shadow:0 0 30px rgba(0,229,255,0.15);
-}
-.price-cta.t3 {
-  background:linear-gradient(135deg, var(--purple), #6d28d9);
-  color:#fff; box-shadow:0 0 30px rgba(139,92,246,0.2);
-}
-.price-cta:hover { transform:translateY(-2px); filter:brightness(1.1); }
-
-/* ===== DASHBOARD PREVIEW ===== */
-.dash-preview {
-  border-radius:16px; border:1px solid var(--border);
-  background:var(--bg2); overflow:hidden;
-  margin-top:60px;
-}
-.dash-header {
-  display:flex; align-items:center; gap:8px; padding:16px 20px;
-  border-bottom:1px solid var(--border); background:var(--bg3);
-}
-.dash-dot { width:10px; height:10px; border-radius:50%; }
-.dash-title { font-size:11px; color:var(--muted); margin-left:8px; letter-spacing:0.08em; }
-.dash-content { display:grid; grid-template-columns:200px 1fr; min-height:420px; }
-.dash-sidebar {
-  border-right:1px solid var(--border); padding:20px;
-  background:rgba(0,0,0,0.2);
-}
-.dash-nav-item {
-  display:flex; align-items:center; gap:10px;
-  padding:10px 12px; border-radius:8px; margin-bottom:4px;
-  font-size:11px; color:var(--muted); cursor:pointer; transition:all .2s;
-}
-.dash-nav-item:hover, .dash-nav-item.active {
-  background:rgba(0,229,255,0.08); color:var(--cyan);
-}
-.dash-nav-item .icon { font-size:14px; }
-.dash-main { padding:24px; }
-.dash-kpis { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:24px; }
-.kpi {
-  border:1px solid var(--border); border-radius:10px;
-  padding:16px; background:rgba(0,0,0,0.2); cursor:pointer;
-  transition:all .2s;
-}
-.kpi:hover { border-color:rgba(0,229,255,0.25); transform:scale(1.02); }
-.kpi-label { font-size:9px; color:var(--muted); letter-spacing:0.1em; margin-bottom:8px; }
-.kpi-val {
-  font-family:'Syne', sans-serif; font-size:24px; font-weight:800;
-}
-.kpi-delta { font-size:10px; margin-top:4px; }
-.kpi-delta.up { color:var(--teal); }
-.kpi-delta.down { color:var(--red); }
-.dash-chart-row { display:grid; grid-template-columns:1fr 140px; gap:12px; }
-.chart-box {
-  border:1px solid var(--border); border-radius:10px;
-  padding:16px; background:rgba(0,0,0,0.2);
-}
-.chart-title { font-size:10px; color:var(--muted); margin-bottom:16px; letter-spacing:0.08em; }
-.bar-chart { display:flex; align-items:flex-end; gap:6px; height:80px; }
-.bar {
-  flex:1; border-radius:3px 3px 0 0;
-  background:linear-gradient(180deg, var(--cyan), var(--teal));
-  opacity:.7; transition:opacity .2s; cursor:pointer;
-  position:relative;
-}
-.bar:hover { opacity:1; }
-.bar-label { font-size:8px; color:var(--muted); text-align:center; margin-top:4px; }
-.donut-box {
-  border:1px solid var(--border); border-radius:10px;
-  padding:16px; background:rgba(0,0,0,0.2);
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-}
-.donut-svg { width:90px; height:90px; }
-.donut-legend { margin-top:8px; }
-.legend-item {
-  display:flex; align-items:center; gap:6px;
-  font-size:9px; color:var(--muted); margin-bottom:4px;
-}
-.legend-dot { width:6px; height:6px; border-radius:50%; }
-
-/* ===== WHATSAPP DEMO ===== */
-.chat-demo {
-  border-radius:16px; border:1px solid var(--border);
-  background:var(--bg2); overflow:hidden;
-  max-width:420px; margin:40px auto 0;
-}
-.chat-header {
-  padding:16px 20px; background:var(--bg3);
-  border-bottom:1px solid var(--border);
-  display:flex; align-items:center; gap:12px;
-}
-.chat-avatar {
-  width:36px; height:36px; border-radius:50%;
-  background:linear-gradient(135deg, var(--teal), var(--cyan));
-  display:flex; align-items:center; justify-content:center;
-  font-size:16px;
-}
-.chat-name { font-family:'Syne', sans-serif; font-size:13px; font-weight:700; }
-.chat-status { font-size:10px; color:var(--teal); }
-.chat-messages { padding:20px; min-height:280px; display:flex; flex-direction:column; gap:12px; }
-.msg {
-  max-width:80%; padding:10px 14px; border-radius:12px;
-  font-size:11px; line-height:1.6;
-  animation:msgIn .4s ease;
-}
-@keyframes msgIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
-.msg.incoming {
-  background:rgba(0,196,167,0.12); border:1px solid rgba(0,196,167,0.2);
-  align-self:flex-start; border-bottom-left-radius:4px; color:var(--text);
-}
-.msg.outgoing {
-  background:rgba(0,229,255,0.1); border:1px solid rgba(0,229,255,0.2);
-  align-self:flex-end; border-bottom-right-radius:4px; color:var(--text);
-}
-.msg-buttons { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
-.msg-btn {
-  padding:5px 10px; border-radius:16px;
-  border:1px solid rgba(0,229,255,0.3); background:rgba(0,229,255,0.06);
-  color:var(--cyan); font-size:10px; cursor:pointer; transition:all .15s;
+.header-badge {
   font-family:'DM Mono', monospace;
+  font-size:0.6rem; color:var(--muted2);
+  border:1px solid var(--border2);
+  padding:5px 12px; border-radius:20px;
+  letter-spacing:0.08em;
 }
-.msg-btn:hover { background:rgba(0,229,255,0.15); }
-.chat-input-row {
-  padding:12px 16px; border-top:1px solid var(--border);
-  display:flex; gap:8px; align-items:center;
-}
-.chat-input {
-  flex:1; background:rgba(255,255,255,0.04);
-  border:1px solid var(--border); border-radius:20px;
-  padding:8px 14px; color:var(--text); font-size:11px;
-  font-family:'DM Mono', monospace; outline:none;
-}
-.chat-send-btn {
-  width:32px; height:32px; border-radius:50%;
-  background:linear-gradient(135deg, var(--cyan), var(--teal));
-  border:none; cursor:pointer;
-  display:flex; align-items:center; justify-content:center; font-size:14px;
-  transition:all .15s;
-}
-.chat-send-btn:hover { transform:scale(1.1); }
 
-/* ===== ROI TABLE ===== */
-.roi-table { width:100%; border-collapse:collapse; margin-top:40px; }
-.roi-table th {
-  text-align:left; padding:12px 16px;
-  font-size:9px; letter-spacing:0.12em; color:var(--muted);
+/* ── HERO ── */
+.hero {
+  padding:72px 0 56px;
   border-bottom:1px solid var(--border);
+}
+.hero-eyebrow {
+  font-family:'DM Mono', monospace;
+  font-size:0.6rem; color:var(--cyan);
+  letter-spacing:0.2em; text-transform:uppercase;
+  margin-bottom:20px;
+  display:flex; align-items:center; gap:10px;
+  animation:fadeUp 0.7s ease both;
+}
+.hero-eyebrow::before {
+  content:''; width:32px; height:1px; background:var(--cyan); display:block;
+}
+
+.hero-title {
+  font-family:'Syne', sans-serif;
+  font-size:clamp(2.8rem, 7vw, 5rem);
+  font-weight:800; line-height:1.0;
+  color:var(--text); margin-bottom:8px;
+  animation:fadeUp 0.7s 0.08s ease both;
+}
+.hero-title em {
+  font-family:'Instrument Serif', serif;
+  font-style:italic; color:var(--cyan);
   font-weight:400;
 }
-.roi-table td {
-  padding:14px 16px; font-size:12px;
-  border-bottom:1px solid rgba(255,255,255,0.04);
-  transition:background .15s;
+.hero-title strong {
+  font-weight:800; font-style:normal; color:var(--text);
+  display:block;
 }
-.roi-table tr:hover td { background:rgba(0,229,255,0.03); }
-.roi-table td:last-child { color:var(--teal); font-weight:500; }
-.roi-table td.feature-name { color:var(--text); }
-.roi-table td.rate { color:var(--muted); text-decoration:line-through; font-size:11px; }
-.tag-pill {
-  display:inline-block; padding:2px 8px; border-radius:4px;
-  font-size:9px; letter-spacing:0.06em; font-weight:700;
-}
-.tag-t2 { background:rgba(0,229,255,0.12); color:var(--cyan); border:1px solid rgba(0,229,255,0.2); }
-.tag-t3 { background:rgba(139,92,246,0.12); color:var(--purple); border:1px solid rgba(139,92,246,0.2); }
-.tag-both { background:rgba(0,196,167,0.1); color:var(--teal); border:1px solid rgba(0,196,167,0.2); }
 
-/* ===== TIMELINE STEPS ===== */
-.timeline-steps {
-  display:flex; gap:0; margin-top:60px; position:relative;
-  overflow-x:auto; padding-bottom:8px;
+.hero-sub {
+  font-size:0.85rem; color:var(--muted2);
+  max-width:500px; line-height:1.8;
+  margin:20px 0 36px;
+  animation:fadeUp 0.7s 0.16s ease both;
 }
-.timeline-steps::before {
-  content:''; position:absolute; top:32px; left:0; right:0; height:1px;
-  background:linear-gradient(90deg, transparent, var(--cyan), var(--purple), transparent);
-  z-index:0;
+
+.hero-meta {
+  display:flex; align-items:center; gap:24px; flex-wrap:wrap;
+  animation:fadeUp 0.7s 0.24s ease both;
 }
-.t-step {
-  flex:1; min-width:150px; text-align:center; position:relative; z-index:1;
-  padding:0 12px;
+.meta-item {
+  display:flex; align-items:center; gap:8px;
+  font-size:0.72rem; color:var(--muted2);
 }
-.t-dot {
-  width:20px; height:20px; border-radius:50%; margin:22px auto 16px;
-  border:2px solid;
+.meta-item .mi-dot {
+  width:6px; height:6px; border-radius:50%;
+  background:var(--cyan); flex-shrink:0;
+}
+.meta-divider { color:var(--border2); }
+
+/* ── SECTION LABEL ── */
+.section-label {
+  font-family:'DM Mono', monospace;
+  font-size:0.58rem; color:var(--muted);
+  letter-spacing:0.18em; text-transform:uppercase;
+  padding:40px 0 20px;
+  display:flex; align-items:center; gap:12px;
+}
+.section-label::after {
+  content:''; flex:1; height:1px; background:var(--border);
+}
+
+/* ── CARDS GRID ── */
+.cards-grid {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+  margin-bottom:60px;
+}
+@media(max-width:620px){ .cards-grid { grid-template-columns:1fr; } }
+
+.pres-card {
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:20px;
+  overflow:hidden;
+  text-decoration:none;
+  display:flex; flex-direction:column;
+  transition:border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+  position:relative;
+  animation:fadeUp 0.7s ease both;
+}
+.pres-card:nth-child(1){ animation-delay:0.3s; }
+.pres-card:nth-child(2){ animation-delay:0.38s; }
+.pres-card:nth-child(3){ animation-delay:0.46s; }
+.pres-card:nth-child(4){ animation-delay:0.54s; }
+
+.pres-card:hover {
+  border-color:rgba(0,229,255,0.25);
+  transform:translateY(-4px);
+  box-shadow:0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,229,255,0.12);
+}
+.pres-card:hover .card-arrow { transform:translate(3px,-3px); }
+.pres-card:hover .card-glow  { opacity:1; }
+
+.card-glow {
+  position:absolute; inset:0; border-radius:20px;
+  background:radial-gradient(ellipse at 20% 20%, rgba(0,229,255,0.05) 0%, transparent 60%);
+  opacity:0; transition:opacity 0.3s; pointer-events:none;
+}
+
+.card-visual {
+  height:130px;
   display:flex; align-items:center; justify-content:center;
-  font-size:8px; font-weight:700;
-  background:var(--bg);
+  position:relative; overflow:hidden;
+  border-bottom:1px solid var(--border);
 }
-.t-step.s1 .t-dot { border-color:var(--cyan); color:var(--cyan); }
-.t-step.s2 .t-dot { border-color:var(--teal); color:var(--teal); }
-.t-step.s3 .t-dot { border-color:var(--purple); color:var(--purple); }
-.t-step.s4 .t-dot { border-color:var(--gold); color:var(--gold); }
-.t-label { font-size:10px; color:var(--muted); line-height:1.5; }
-.t-label strong { display:block; font-family:'Syne', sans-serif; font-size:12px; color:var(--text); margin-bottom:4px; }
+.card-visual-bg {
+  position:absolute; inset:0; opacity:0.5;
+}
+.card-visual-number {
+  font-family:'Syne', sans-serif;
+  font-size:6rem; font-weight:800;
+  color:rgba(255,255,255,0.03);
+  position:absolute; line-height:1;
+  user-select:none;
+}
+.card-visual-icon {
+  font-size:2.2rem; position:relative; z-index:1;
+  filter:drop-shadow(0 4px 20px rgba(0,229,255,0.3));
+}
+.card-tag {
+  position:absolute; top:12px; left:12px;
+  font-family:'DM Mono', monospace; font-size:0.55rem;
+  letter-spacing:0.12em; text-transform:uppercase;
+  padding:3px 8px; border-radius:4px;
+  background:rgba(0,0,0,0.5); color:var(--muted2);
+  border:1px solid var(--border2); z-index:2;
+}
+.card-tag.featured {
+  background:rgba(0,229,255,0.12); color:var(--cyan);
+  border-color:rgba(0,229,255,0.25);
+}
+.card-tag.purple {
+  background:rgba(139,92,246,0.12); color:var(--purple);
+  border-color:rgba(139,92,246,0.25);
+}
+.card-tag.teal {
+  background:rgba(0,196,167,0.12); color:var(--teal);
+  border-color:rgba(0,196,167,0.25);
+}
 
-/* ===== MODAL ===== */
-.modal-overlay {
-  position:fixed; inset:0; z-index:500;
-  background:rgba(3,5,10,0.9); backdrop-filter:blur(16px);
-  display:none; align-items:center; justify-content:center; padding:20px;
+.card-body {
+  padding:20px 22px 20px;
+  flex:1; display:flex; flex-direction:column;
 }
-.modal-overlay.show { display:flex; }
-.modal {
-  background:var(--bg2); border:1px solid rgba(0,229,255,0.2);
-  border-radius:20px; padding:40px; max-width:560px; width:100%;
-  position:relative; animation:modalIn .3s ease;
+.card-num {
+  font-family:'DM Mono', monospace;
+  font-size:0.58rem; color:var(--muted);
+  margin-bottom:6px; letter-spacing:0.1em;
 }
-@keyframes modalIn { from{opacity:0;transform:scale(.95)} to{opacity:1;transform:none} }
-.modal-close {
-  position:absolute; top:16px; right:16px;
-  width:32px; height:32px; border-radius:50%; border:1px solid var(--border);
-  background:transparent; color:var(--muted); cursor:pointer; font-size:16px;
-  display:flex; align-items:center; justify-content:center; transition:all .15s;
+.card-title {
+  font-family:'Syne', sans-serif;
+  font-size:1.1rem; font-weight:700; color:var(--text);
+  line-height:1.2; margin-bottom:6px;
 }
-.modal-close:hover { border-color:var(--red); color:var(--red); }
-.modal h3 {
-  font-family:'Syne', sans-serif; font-size:22px; font-weight:800; margin-bottom:8px;
+.card-desc {
+  font-size:0.75rem; color:var(--muted2);
+  line-height:1.65; flex:1; margin-bottom:16px;
 }
-.modal-tag {
-  display:inline-block; padding:3px 10px; border-radius:4px; margin-bottom:20px;
-  font-size:10px; letter-spacing:0.08em;
+.card-footer {
+  display:flex; align-items:center; justify-content:space-between;
 }
-.modal p { font-size:12px; color:var(--muted); line-height:1.8; margin-bottom:16px; }
-.modal-features { display:flex; flex-direction:column; gap:8px; margin-top:16px; }
-.modal-feature {
-  display:flex; align-items:flex-start; gap:10px;
-  font-size:11px; color:var(--text); padding:8px 0;
-  border-bottom:1px solid rgba(255,255,255,0.04);
+.card-pills { display:flex; gap:5px; flex-wrap:wrap; }
+.card-pill {
+  font-size:0.6rem; padding:2px 8px; border-radius:4px;
+  background:var(--surface); color:var(--muted2);
+  border:1px solid var(--border2);
 }
-.modal-feature .icon { font-size:14px; flex-shrink:0; }
+.card-arrow {
+  width:28px; height:28px; border-radius:50%;
+  background:rgba(0,229,255,0.06); border:1px solid rgba(0,229,255,0.2);
+  display:flex; align-items:center; justify-content:center;
+  color:var(--cyan); font-size:0.75rem; flex-shrink:0;
+  transition:transform 0.2s;
+}
 
-/* ===== FOOTER ===== */
+/* Featured card — full width */
+.pres-card.featured {
+  grid-column:1 / -1;
+  flex-direction:row;
+  border-color:rgba(0,229,255,0.14);
+}
+.pres-card.featured .card-visual {
+  width:220px; min-width:220px; height:auto;
+  border-bottom:none; border-right:1px solid var(--border);
+}
+@media(max-width:620px){
+  .pres-card.featured { flex-direction:column; }
+  .pres-card.featured .card-visual { width:100%; height:120px; border-right:none; border-bottom:1px solid var(--border); }
+}
+
+/* Featured left accent line */
+.pres-card.featured::after {
+  content:'';
+  position:absolute; left:0; top:0; bottom:0; width:2px;
+  background:linear-gradient(180deg, transparent, var(--cyan), transparent);
+  opacity:0; transition:opacity 0.3s;
+}
+.pres-card.featured:hover::after { opacity:1; }
+
+/* ── WHAT THIS BUILDS ── */
+.expect-grid {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:14px;
+  margin-bottom:60px;
+}
+@media(max-width:620px){ .expect-grid { grid-template-columns:1fr; } }
+.expect-item {
+  padding:20px; border-radius:14px;
+  border:1px solid var(--border);
+  background:var(--surface);
+  animation:fadeUp 0.7s ease both;
+}
+.expect-item:nth-child(1){ animation-delay:0.3s; }
+.expect-item:nth-child(2){ animation-delay:0.38s; }
+.expect-item:nth-child(3){ animation-delay:0.46s; }
+.expect-icon { font-size:1.3rem; margin-bottom:10px; display:block; }
+.expect-title {
+  font-family:'Syne', sans-serif;
+  font-size:0.95rem; font-weight:700; color:var(--text); margin-bottom:5px;
+}
+.expect-desc { font-size:0.72rem; color:var(--muted2); line-height:1.65; }
+
+/* ── FOOTER ── */
 footer {
-  border-top:1px solid var(--border); padding:48px 40px;
-  text-align:center; position:relative; z-index:1;
+  border-top:1px solid var(--border);
+  padding:36px 0 48px;
+  display:flex; align-items:flex-start; justify-content:space-between;
+  gap:24px; flex-wrap:wrap;
 }
-.footer-logo {
-  font-family:'Syne', sans-serif; font-size:14px; font-weight:800;
-  color:var(--cyan); letter-spacing:0.05em; margin-bottom:12px;
+.footer-from {
+  display:flex; flex-direction:column; gap:4px;
 }
-.footer-tagline { font-size:11px; color:var(--muted); margin-bottom:24px; }
-.footer-links { display:flex; gap:24px; justify-content:center; flex-wrap:wrap; }
-.footer-link { font-size:11px; color:var(--muted); cursor:pointer; letter-spacing:0.06em; transition:color .15s; }
-.footer-link:hover { color:var(--cyan); }
-.footer-copy { margin-top:32px; font-size:10px; color:rgba(255,255,255,0.15); }
+.footer-prepared { font-size:0.65rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:4px; }
+.footer-name { font-family:'Syne', sans-serif; font-size:1rem; font-weight:700; color:var(--text); }
+.footer-role { font-size:0.72rem; color:var(--muted2); }
+.footer-contact { display:flex; flex-direction:column; gap:4px; text-align:right; }
+.footer-contact a { font-size:0.72rem; color:var(--muted2); text-decoration:none; transition:color 0.15s; }
+.footer-contact a:hover { color:var(--cyan); }
+.footer-valid {
+  width:100%; padding-top:20px; border-top:1px solid var(--border);
+  font-family:'DM Mono', monospace; font-size:0.58rem;
+  color:var(--muted); display:flex; align-items:center; justify-content:space-between;
+  flex-wrap:wrap; gap:8px;
+}
+.valid-dot {
+  display:inline-block; width:6px; height:6px; border-radius:50%;
+  background:var(--cyan); margin-right:6px;
+  animation:blink 2s ease infinite;
+}
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
 
-/* ===== TABS SECTION ===== */
-.tabs { display:flex; gap:4px; border-bottom:1px solid var(--border); margin-top:40px; }
-.tab-btn {
-  padding:10px 20px; border:none; background:transparent;
-  color:var(--muted); font-family:'DM Mono', monospace; font-size:11px;
-  cursor:pointer; border-bottom:2px solid transparent;
-  transition:all .2s; letter-spacing:0.05em;
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(18px); }
+  to   { opacity:1; transform:translateY(0); }
 }
-.tab-btn.active { color:var(--cyan); border-bottom-color:var(--cyan); }
-.tab-panel { display:none; padding:32px 0; }
-.tab-panel.active { display:block; }
 
-/* ===== SAVINGS BANNER ===== */
-.savings-banner {
-  border:1px solid rgba(0,196,167,0.25); border-radius:12px;
-  background:rgba(0,196,167,0.05); padding:24px 32px;
-  display:flex; align-items:center; gap:24px; margin-top:32px; flex-wrap:wrap;
+/* ── MOBILE BOTTOM NAV ── */
+.mobile-bottom-nav {
+  display:none;
+  position:fixed; bottom:0; left:0; right:0; z-index:9999;
+  background:#080c14; border-top:1px solid rgba(0,229,255,0.08);
+  padding:8px 0 env(safe-area-inset-bottom, 8px);
 }
-.savings-val {
-  font-family:'Syne', sans-serif; font-size:48px; font-weight:800;
-  background:linear-gradient(135deg, var(--teal), var(--cyan));
-  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-}
-.savings-label { font-size:12px; color:var(--muted); }
-
-/* ===== RESPONSIVE ===== */
 @media(max-width:768px){
-  nav { padding:0 16px; }
-  .nav-tabs { display:none; }
-  .section, .pricing-section { padding:60px 16px; }
-  .hero { padding:80px 16px 60px; }
-  .hero-stats { gap:24px; }
-  .dash-content { grid-template-columns:1fr; }
-  .dash-sidebar { display:none; }
-  .dash-kpis { grid-template-columns:1fr 1fr; }
-  .dash-chart-row { grid-template-columns:1fr; }
+  .mobile-bottom-nav { display:flex; }
+  header { flex-wrap:wrap; gap:12px; padding-top:32px; }
+  .wrap  { padding-bottom:70px; }
 }
-
-/* ===== ANIMATIONS ===== */
-.fade-in { opacity:0; transform:translateY(20px); transition:opacity .6s ease, transform .6s ease; }
-.fade-in.visible { opacity:1; transform:none; }
-
-/* ===== ACTIVE SECTION HIGHLIGHTING ===== */
-.section-anchor { padding-top:80px; margin-top:-80px; }
+@media(max-width:480px){
+  header { flex-direction:column; align-items:flex-start; }
+  .header-badge { align-self:flex-start; }
+}
+.mbn-item {
+  flex:1; display:flex; flex-direction:column; align-items:center;
+  gap:3px; text-decoration:none; color:var(--muted); padding:4px 0;
+}
+.mbn-item.active { color:var(--cyan); }
+.mbn-icon  { font-size:1.2rem; line-height:1; }
+.mbn-label { font-size:0.58rem; text-transform:uppercase; letter-spacing:0.05em; }
 </style>
 </head>
 <body>
-<div class="grid-bg"></div>
 
-<!-- NAV -->
-<nav>
-  <div class="nav-logo">
-    <div class="nav-logo-icon">🚐</div>
-    TRANSPORT SHUTTLE OS
+<div class="grid-bg"></div>
+<div class="glow-orb glow-1"></div>
+<div class="glow-orb glow-2"></div>
+<div class="scroll-bar" id="scrollBar"></div>
+
+<div class="wrap">
+
+  <!-- HEADER -->
+  <header>
+    <div class="mm-logo">
+      <div class="mm-mark">MM</div>
+      <div class="mm-name">Mirembe Muse</div>
+    </div>
+    <div class="header-badge">Transport Shuttle OS · 2026</div>
+  </header>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-eyebrow">Prepared for Eastern Cape Shuttle · Tier 3 Vision System</div>
+    <h1 class="hero-title">
+      <em>Digital Transformation</em>
+      <strong>Proposal</strong>
+    </h1>
+    <p class="hero-sub">
+      A complete walkthrough of your new operating system — from how customers book and pay, to how you manage routes, revenue, and reputation automatically.
+    </p>
+    <div class="hero-meta">
+      <div class="meta-item"><div class="mi-dot"></div> 4 interactive sections</div>
+      <div class="meta-divider">·</div>
+      <div class="meta-item"><div class="mi-dot"></div> Live demos — fully clickable</div>
+      <div class="meta-divider">·</div>
+      <div class="meta-item"><div class="mi-dot"></div> Valid 30 days from issue</div>
+    </div>
   </div>
-  <div class="nav-tabs">
-    <button class="nav-tab active" onclick="scrollTo('#overview')">Overview</button>
-    <button class="nav-tab" onclick="scrollTo('#phases')">Phases</button>
-    <button class="nav-tab" onclick="scrollTo('#dashboard')">Dashboard</button>
-    <button class="nav-tab" onclick="scrollTo('#pricing')">Pricing</button>
-    <button class="nav-tab" onclick="scrollTo('#roi')">ROI</button>
+
+  <!-- SECTION CARDS -->
+  <div class="section-label">Presentation Sections</div>
+
+  <div class="cards-grid">
+
+    <!-- CARD 1: FULL PROPOSAL — featured -->
+    <a class="pres-card featured" href="proposal.html">
+      <div class="card-glow"></div>
+      <div class="card-visual">
+        <div class="card-visual-bg" style="background:linear-gradient(135deg,#001a20,#03050a);"></div>
+        <div class="card-visual-number">01</div>
+        <div class="card-visual-icon">📊</div>
+        <span class="card-tag featured">Start Here</span>
+      </div>
+      <div class="card-body">
+        <div class="card-num">Section 01 of 04</div>
+        <div class="card-title">Strategy & Investment Proposal</div>
+        <div class="card-desc">The full business case — the problem, the opportunity, all three phases with deliverables, pricing tiers, ROI breakdown, and the 12-month transformation roadmap.</div>
+        <div class="card-footer">
+          <div class="card-pills">
+            <span class="card-pill">3 Phases</span>
+            <span class="card-pill">2 Tiers</span>
+            <span class="card-pill">Full Pricing</span>
+          </div>
+          <div class="card-arrow">↗</div>
+        </div>
+      </div>
+    </a>
+
+    <!-- CARD 2: LIVE DASHBOARD & CHATBOT -->
+    <a class="pres-card" href="proposal.html#dashboard">
+      <div class="card-glow"></div>
+      <div class="card-visual">
+        <div class="card-visual-bg" style="background:linear-gradient(135deg,#001a14,#03050a);"></div>
+        <div class="card-visual-number">02</div>
+        <div class="card-visual-icon">📱</div>
+        <span class="card-tag teal">Live Demo</span>
+      </div>
+      <div class="card-body">
+        <div class="card-num">Section 02 of 04</div>
+        <div class="card-title">AI Chatbot & Live Dashboard</div>
+        <div class="card-desc">Interact with the AI chatbot exactly as your customers would — school transport, airport transfers, corporate events. Then explore the live analytics dashboard with real revenue data.</div>
+        <div class="card-footer">
+          <div class="card-pills">
+            <span class="card-pill">Chatbot Demo</span>
+            <span class="card-pill">Live Data</span>
+            <span class="card-pill">6 Views</span>
+          </div>
+          <div class="card-arrow">↗</div>
+        </div>
+      </div>
+    </a>
+
+    <!-- CARD 3: PRICING & ROI -->
+    <a class="pres-card" href="proposal.html#pricing">
+      <div class="card-glow"></div>
+      <div class="card-visual">
+        <div class="card-visual-bg" style="background:linear-gradient(135deg,#0a0014,#03050a);"></div>
+        <div class="card-visual-number">03</div>
+        <div class="card-visual-icon">💎</div>
+        <span class="card-tag purple">Investment</span>
+      </div>
+      <div class="card-body">
+        <div class="card-num">Section 03 of 04</div>
+        <div class="card-title">Pricing & ROI Analysis</div>
+        <div class="card-desc">Two transformation tiers with full market-rate breakdowns, payment structures, and value analysis. See exactly what each component is worth and how the investment pays for itself.</div>
+        <div class="card-footer">
+          <div class="card-pills">
+            <span class="card-pill">Tier 2 · Tier 3</span>
+            <span class="card-pill">ROI Table</span>
+            <span class="card-pill">Retainer</span>
+          </div>
+          <div class="card-arrow">↗</div>
+        </div>
+      </div>
+    </a>
+
+    <!-- CARD 4: 3-PHASE ROADMAP -->
+    <a class="pres-card" href="proposal.html#phases">
+      <div class="card-glow"></div>
+      <div class="card-visual">
+        <div class="card-visual-bg" style="background:linear-gradient(135deg,#0a0a00,#03050a);"></div>
+        <div class="card-visual-number">04</div>
+        <div class="card-visual-icon">🗺️</div>
+        <span class="card-tag">Roadmap</span>
+      </div>
+      <div class="card-body">
+        <div class="card-num">Section 04 of 04</div>
+        <div class="card-title">12-Month Roadmap</div>
+        <div class="card-desc">The phased build plan — Foundation (weeks 1–6), Advanced Intelligence (months 3–6), and Future-Forward (months 7–12). Every deliverable, every milestone, every phase of transformation.</div>
+        <div class="card-footer">
+          <div class="card-pills">
+            <span class="card-pill">Phase 1–3</span>
+            <span class="card-pill">16 Deliverables</span>
+            <span class="card-pill">12 Months</span>
+          </div>
+          <div class="card-arrow">↗</div>
+        </div>
+      </div>
+    </a>
+
   </div>
-  <div class="nav-badge">PROPOSAL v2.0</div>
+
+  <!-- WHAT THIS BUILDS -->
+  <div class="section-label">What This Builds For You</div>
+  <div class="expect-grid">
+    <div class="expect-item">
+      <span class="expect-icon">⚡</span>
+      <div class="expect-title">Zero Admin Hours</div>
+      <div class="expect-desc">Every booking confirmation, payment reminder, trip update, and review request sends automatically. You drive — the system handles everything else.</div>
+    </div>
+    <div class="expect-item">
+      <span class="expect-icon">📈</span>
+      <div class="expect-title">Intelligence, Not Guesswork</div>
+      <div class="expect-desc">Route profitability, VIP customer rankings, seasonal forecasts, competitor benchmarking — the dashboard tells you exactly where to focus every month.</div>
+    </div>
+    <div class="expect-item">
+      <span class="expect-icon">🏆</span>
+      <div class="expect-title">No Competitor Matches This</div>
+      <div class="expect-desc">While others book by phone and chase payments by WhatsApp, you're running a fully automated, AI-powered operation from your phone. You don't compete — you leapfrog.</div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-from">
+      <div class="footer-prepared">Prepared by</div>
+      <div class="footer-name">Nanda · Creative Technologist</div>
+      <div class="footer-role">Mirembe Muse Digital Services (Pty) Ltd</div>
+    </div>
+    <div class="footer-contact">
+      <a href="tel:0842916742">084 291 6742</a>
+      <a href="mailto:hello@mirembemuse.co.za">hello@mirembemuse.co.za</a>
+      <a href="https://creativelynanda.co.za" target="_blank">creativelynanda.co.za</a>
+    </div>
+    <div class="footer-valid">
+      <span><span class="valid-dot"></span>This proposal is valid for 30 days from date of issue · Prices in ZAR · Exclude VAT</span>
+      <span>© 2026 Mirembe Muse Digital Services (Pty) Ltd</span>
+    </div>
+  </footer>
+
+</div>
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="mobile-bottom-nav">
+  <a href="index.html" class="mbn-item active">
+    <span class="mbn-icon">⌂</span>
+    <span class="mbn-label">Home</span>
+  </a>
+  <a href="proposal.html" class="mbn-item">
+    <span class="mbn-icon">📊</span>
+    <span class="mbn-label">Proposal</span>
+  </a>
+  <a href="proposal.html#dashboard" class="mbn-item">
+    <span class="mbn-icon">📱</span>
+    <span class="mbn-label">Demo</span>
+  </a>
+  <a href="proposal.html#pricing" class="mbn-item">
+    <span class="mbn-icon">💎</span>
+    <span class="mbn-label">Pricing</span>
+  </a>
+  <a href="proposal.html#phases" class="mbn-item">
+    <span class="mbn-icon">🗺️</span>
+    <span class="mbn-label">Roadmap</span>
+  </a>
 </nav>
 
-<!-- HERO -->
-<section class="hero" id="overview">
-  <div class="hero-tag"><span></span> MIREMBE MUSE × SHUTTLE OPERATIONS</div>
-  <h1>
-    <div class="line1">TRANSPORT</div>
-    <div class="line2">SHUTTLE OS</div>
-  </h1>
-  <p class="hero-sub">A 12-month digital transformation. From bookings to intelligence.</p>
-  <div class="hero-stats">
-    <div class="hero-stat">
-      <span class="hero-stat-val">R197K+</span>
-      <div class="hero-stat-label">TOTAL VALUE</div>
-    </div>
-    <div class="hero-stat">
-      <span class="hero-stat-val">R131K</span>
-      <div class="hero-stat-label">TIER 3 SETUP</div>
-    </div>
-    <div class="hero-stat">
-      <span class="hero-stat-val">16</span>
-      <div class="hero-stat-label">FEATURES</div>
-    </div>
-    <div class="hero-stat">
-      <span class="hero-stat-val">24/7</span>
-      <div class="hero-stat-label">AUTOMATION</div>
-    </div>
-  </div>
-  <div class="hero-cta-row">
-    <button class="btn-primary" onclick="scrollTo('#pricing')">View Pricing</button>
-    <button class="btn-outline" onclick="scrollTo('#phases')">Explore Features</button>
-  </div>
-  <div class="scroll-hint">
-    <div class="scroll-line"></div>
-    SCROLL
-  </div>
-</section>
-
-<!-- PHASES -->
-<div class="section-anchor" id="phases"></div>
-<div class="section fade-in">
-  <div class="section-label">FEATURE ROADMAP</div>
-  <div class="section-title">Three phases.<br><em>One transformation.</em></div>
-
-  <!-- TIER TOGGLE -->
-  <div class="tier-toggle">
-    <button class="tier-btn t2 active" onclick="setTier(2)">TIER 2 — GROWTH</button>
-    <button class="tier-btn t3" onclick="setTier(3)">TIER 3 — VISION</button>
-  </div>
-
-  <div class="timeline" id="phase-timeline">
-
-    <!-- PHASE 1 -->
-    <div class="phase-card open" id="phase1">
-      <div class="phase-header" onclick="togglePhase('phase1')">
-        <div class="phase-num">PHASE 01</div>
-        <div class="phase-icon" style="background:rgba(0,229,255,0.1)">🏗️</div>
-        <div>
-          <div class="phase-title">Foundation + Automation</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:3px;">The complete launchpad</div>
-        </div>
-        <div class="phase-meta">
-          <div class="phase-badge" style="background:rgba(0,229,255,0.1);color:var(--cyan);border:1px solid rgba(0,229,255,0.2);">WEEKS 1–6</div>
-          <div class="phase-timeline-label">Delivered first</div>
-        </div>
-        <div class="phase-chevron">▾</div>
-      </div>
-      <div class="phase-body">
-        <div class="feature-grid">
-          <div class="feature-tile" onclick="openModal('website')">
-            <div class="feature-tile-icon">🌐</div>
-            <div class="feature-tile-title">5-Page Professional Website</div>
-            <div class="feature-tile-desc">Home, Scholar Transport, Corporate Events, Airport Transfers, Contact. Fully responsive with booking CTAs on every page.</div>
-            <span class="feature-tile-tag tag-both">BOTH TIERS</span>
-          </div>
-          <div class="feature-tile" onclick="openModal('notion')">
-            <div class="feature-tile-icon">📋</div>
-            <div class="feature-tile-title">Notion Business Hub</div>
-            <div class="feature-tile-desc">Full business management: bookings, finances, routes, customers, vehicles. All in one connected workspace.</div>
-            <span class="feature-tile-tag tag-both">BOTH TIERS</span>
-          </div>
-          <div class="feature-tile" onclick="openModal('booking')">
-            <div class="feature-tile-icon">⚡</div>
-            <div class="feature-tile-title">Automated Booking System</div>
-            <div class="feature-tile-desc">Supabase backend. Real-time availability, instant confirmations, flight tracking, and calendar sync. Zero manual entry.</div>
-            <span class="feature-tile-tag tag-both">BOTH TIERS</span>
-          </div>
-          <div class="feature-tile" onclick="openModal('notionapi')">
-            <div class="feature-tile-icon">🔗</div>
-            <div class="feature-tile-title">Notion API Integration</div>
-            <div class="feature-tile-desc">Booking → Database → Notion → WhatsApp. Automated reminders, payment follow-ups, and vehicle maintenance alerts.</div>
-            <span class="feature-tile-tag tag-both">BOTH TIERS</span>
-          </div>
-          <div class="feature-tile" onclick="openModal('chatbot')">
-            <div class="feature-tile-icon">🤖</div>
-            <div class="feature-tile-title">24/7 AI Chatbot</div>
-            <div class="feature-tile-desc">Rule-based intelligence via Tidio. Handles scholar, corporate & airport queries. Captures leads at midnight, on weekends, always.</div>
-            <span class="feature-tile-tag tag-both">BOTH TIERS</span>
-          </div>
-          <div class="feature-tile" onclick="openModal('social')">
-            <div class="feature-tile-icon">📱</div>
-            <div class="feature-tile-title">60 Posts + Social Setup</div>
-            <div class="feature-tile-desc">3 months of scheduled content across Facebook, Instagram, LinkedIn & X. All platforms optimized. Branded Canva templates included.</div>
-            <span class="feature-tile-tag tag-t2">TIER 2: 60 POSTS</span>
-          </div>
-          <div class="feature-tile" onclick="openModal('google')">
-            <div class="feature-tile-icon">📍</div>
-            <div class="feature-tile-title">Google Business Optimization</div>
-            <div class="feature-tile-desc">Rank for "school transport PE," "airport shuttle Eastern Cape." Review management, local SEO, and keyword targeting.</div>
-            <span class="feature-tile-tag tag-both">BOTH TIERS</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- PHASE 2 - Tier 3 only indicator -->
-    <div class="phase-card" id="phase2">
-      <div class="phase-header" onclick="togglePhase('phase2')">
-        <div class="phase-num">PHASE 02</div>
-        <div class="phase-icon" style="background:rgba(0,196,167,0.1)">🧠</div>
-        <div>
-          <div class="phase-title">Advanced Intelligence</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:3px;">AI, WhatsApp automation & analytics</div>
-        </div>
-        <div class="phase-meta">
-          <div class="phase-badge" style="background:rgba(139,92,246,0.12);color:var(--purple);border:1px solid rgba(139,92,246,0.2);">MONTHS 3–6</div>
-          <div class="phase-timeline-label phase-tier3-only" style="color:var(--purple);">TIER 3 ONLY</div>
-        </div>
-        <div class="phase-chevron">▾</div>
-      </div>
-      <div class="phase-body">
-        <div class="feature-grid">
-          <div class="feature-tile" onclick="openModal('whatsapp')">
-            <div class="feature-tile-icon">💬</div>
-            <div class="feature-tile-title">WhatsApp Business API</div>
-            <div class="feature-tile-desc">Official green checkmark verification. Smart quick-reply buttons, instant booking confirmations, 24h reminders, and broadcast campaigns.</div>
-            <span class="feature-tile-tag tag-t3">TIER 3 ONLY</span>
-          </div>
-          <div class="feature-tile" onclick="openModal('gpt')">
-            <div class="feature-tile-icon">✨</div>
-            <div class="feature-tile-title">GPT-Powered AI Chatbot</div>
-            <div class="feature-tile-desc">Upgrade from rule-based to true intelligence. Handles complex queries, detects frustration, responds in Xhosa/Afrikaans, and closes deals 24/7.</div>
-            <span class="feature-tile-tag tag-t3">TIER 3 ONLY</span>
-          </div>
-          <div class="feature-tile" onclick="openModal('analytics')">
-            <div class="feature-tile-icon">📊</div>
-            <div class="feature-tile-title">Predictive Analytics Dashboard</div>
-            <div class="feature-tile-desc">Revenue forecasting, route profitability, VIP customer reports, seasonal trends, and competitor benchmarking. Data-driven decisions.</div>
-            <span class="feature-tile-tag tag-t3">TIER 3 ONLY</span>
-          </div>
-          <div class="feature-tile" onclick="openModal('reputation')">
-            <div class="feature-tile-icon">⭐</div>
-            <div class="feature-tile-title">Automated Reputation Management</div>
-            <div class="feature-tile-desc">Sentiment-triggered review requests. AI-drafted responses to Google & Facebook reviews. Prevents negative reviews through early intervention.</div>
-            <span class="feature-tile-tag tag-t3">TIER 3 ONLY</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- PHASE 3 -->
-    <div class="phase-card" id="phase3">
-      <div class="phase-header" onclick="togglePhase('phase3')">
-        <div class="phase-num">PHASE 03</div>
-        <div class="phase-icon" style="background:rgba(245,158,11,0.1)">🚀</div>
-        <div>
-          <div class="phase-title">Future-Forward Features</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:3px;">Dynamic pricing, loyalty & driver app</div>
-        </div>
-        <div class="phase-meta">
-          <div class="phase-badge" style="background:rgba(245,158,11,0.1);color:var(--gold);border:1px solid rgba(245,158,11,0.2);">MONTHS 7–12</div>
-          <div class="phase-timeline-label" style="color:var(--purple);">TIER 3 ONLY</div>
-        </div>
-        <div class="phase-chevron">▾</div>
-      </div>
-      <div class="phase-body">
-        <div class="feature-grid">
-          <div class="feature-tile" onclick="openModal('pricing-engine')">
-            <div class="feature-tile-icon">💰</div>
-            <div class="feature-tile-title">Dynamic Pricing Engine</div>
-            <div class="feature-tile-desc">Peak surge, off-peak discounts, early-bird rewards, last-minute premiums. Competitor price monitoring. Loyalty tier pricing. Automated.</div>
-            <span class="feature-tile-tag tag-t3">TIER 3 ONLY</span>
-          </div>
-          <div class="feature-tile" onclick="openModal('loyalty')">
-            <div class="feature-tile-icon">🏆</div>
-            <div class="feature-tile-title">Customer Loyalty Program</div>
-            <div class="feature-tile-desc">Bronze → Silver → Gold → Platinum tiers. Points per booking, referral bonuses, birthday rewards. Gamified dashboard. 30–50% higher lifetime value.</div>
-            <span class="feature-tile-tag tag-t3">TIER 3 ONLY</span>
-          </div>
-          <div class="feature-tile" onclick="openModal('driver')">
-            <div class="feature-tile-icon">📲</div>
-            <div class="feature-tile-title">Driver Mobile App</div>
-            <div class="feature-tile-desc">Job assignments, GPS nav, customer contacts, trip checklists, one-tap completion, earnings tracking. For when you scale your fleet.</div>
-            <span class="feature-tile-tag" style="background:rgba(245,158,11,0.1);color:var(--gold);border:1px solid rgba(245,158,11,0.2);">OPTIONAL ADD-ON</span>
-          </div>
-          <div class="feature-tile" onclick="openModal('partnership')">
-            <div class="feature-tile-icon">🤝</div>
-            <div class="feature-tile-title">Strategic Partnership</div>
-            <div class="feature-tile-desc">15% referral commissions (no cap), QR code branding on your Quantums, co-marketing campaigns, template sales commissions up to R16K/year.</div>
-            <span class="feature-tile-tag tag-t3">TIER 3 EXCLUSIVE</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div><!-- /timeline -->
-</div><!-- /section -->
-
-<!-- DASHBOARD PREVIEW -->
-<div class="section-anchor" id="dashboard"></div>
-<div class="section fade-in">
-  <div class="section-label">LIVE PREVIEW</div>
-  <div class="section-title">Your admin<br><em>dashboard.</em></div>
-
-  <div class="dash-preview">
-    <div class="dash-header">
-      <div class="dash-dot" style="background:#ff5f57"></div>
-      <div class="dash-dot" style="background:#febc2e"></div>
-      <div class="dash-dot" style="background:#28c840"></div>
-      <div class="dash-title">TRANSPORT SHUTTLE OS — ADMIN DASHBOARD</div>
-    </div>
-    <div class="dash-content">
-      <div class="dash-sidebar">
-        <div style="font-size:9px;letter-spacing:0.12em;color:var(--muted);padding:4px 12px 12px;">NAVIGATION</div>
-        <div class="dash-nav-item active" onclick="switchDash('overview-dash')"><span class="icon">📊</span>Overview</div>
-        <div class="dash-nav-item" onclick="switchDash('bookings-dash')"><span class="icon">📅</span>Bookings</div>
-        <div class="dash-nav-item" onclick="switchDash('revenue-dash')"><span class="icon">💰</span>Revenue</div>
-        <div class="dash-nav-item" onclick="switchDash('customers-dash')"><span class="icon">👥</span>Customers</div>
-        <div class="dash-nav-item" onclick="switchDash('routes-dash')"><span class="icon">🗺️</span>Routes</div>
-        <div class="dash-nav-item" onclick="switchDash('reviews-dash')"><span class="icon">⭐</span>Reviews</div>
-        <div style="height:1px;background:var(--border);margin:12px 0;"></div>
-        <div style="font-size:9px;letter-spacing:0.12em;color:var(--muted);padding:4px 12px 12px;">VEHICLES</div>
-        <div class="dash-nav-item"><span class="icon">🚐</span>Quantum 1</div>
-        <div class="dash-nav-item"><span class="icon">🚐</span>Quantum 2</div>
-      </div>
-      <div class="dash-main" id="dash-main">
-        <!-- OVERVIEW PANEL -->
-        <div id="overview-dash">
-          <div style="font-size:10px;color:var(--muted);letter-spacing:0.08em;margin-bottom:16px;">DECEMBER 2024 PERFORMANCE</div>
-          <div class="dash-kpis">
-            <div class="kpi" onclick="pulseKpi(this)">
-              <div class="kpi-label">REVENUE</div>
-              <div class="kpi-val" style="color:var(--teal);">R24,500</div>
-              <div class="kpi-delta up">▲ +22% vs target</div>
-            </div>
-            <div class="kpi" onclick="pulseKpi(this)">
-              <div class="kpi-label">BOOKINGS</div>
-              <div class="kpi-val" style="color:var(--cyan);">35</div>
-              <div class="kpi-delta up">▲ 5 above target</div>
-            </div>
-            <div class="kpi" onclick="pulseKpi(this)">
-              <div class="kpi-label">SATISFACTION</div>
-              <div class="kpi-val" style="color:var(--gold);">4.8★</div>
-              <div class="kpi-delta up">▲ +0.2 vs last month</div>
-            </div>
-          </div>
-          <div class="dash-chart-row">
-            <div class="chart-box">
-              <div class="chart-title">MONTHLY REVENUE TREND</div>
-              <div class="bar-chart" id="bar-chart">
-                <div style="flex:1">
-                  <div class="bar" style="height:45%" title="Jul: R11,200"></div>
-                  <div class="bar-label">Jul</div>
-                </div>
-                <div style="flex:1">
-                  <div class="bar" style="height:55%" title="Aug: R13,800"></div>
-                  <div class="bar-label">Aug</div>
-                </div>
-                <div style="flex:1">
-                  <div class="bar" style="height:62%" title="Sep: R15,500"></div>
-                  <div class="bar-label">Sep</div>
-                </div>
-                <div style="flex:1">
-                  <div class="bar" style="height:70%" title="Oct: R17,200"></div>
-                  <div class="bar-label">Oct</div>
-                </div>
-                <div style="flex:1">
-                  <div class="bar" style="height:80%" title="Nov: R19,800"></div>
-                  <div class="bar-label">Nov</div>
-                </div>
-                <div style="flex:1">
-                  <div class="bar" style="height:100%;background:linear-gradient(180deg,var(--gold),var(--teal));opacity:1" title="Dec: R24,500"></div>
-                  <div class="bar-label" style="color:var(--gold)">Dec</div>
-                </div>
-              </div>
-            </div>
-            <div class="donut-box">
-              <div class="chart-title" style="text-align:center">SERVICE MIX</div>
-              <svg class="donut-svg" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="35" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="12"/>
-                <circle cx="50" cy="50" r="35" fill="none" stroke="var(--cyan)" stroke-width="12"
-                  stroke-dasharray="138 82" stroke-dashoffset="0" transform="rotate(-90 50 50)"/>
-                <circle cx="50" cy="50" r="35" fill="none" stroke="var(--teal)" stroke-width="12"
-                  stroke-dasharray="55 165" stroke-dashoffset="-138" transform="rotate(-90 50 50)"/>
-                <circle cx="50" cy="50" r="35" fill="none" stroke="var(--purple)" stroke-width="12"
-                  stroke-dasharray="27 193" stroke-dashoffset="-193" transform="rotate(-90 50 50)"/>
-                <text x="50" y="54" text-anchor="middle" fill="var(--text)" font-size="9" font-family="DM Mono">65%</text>
-              </svg>
-              <div class="donut-legend">
-                <div class="legend-item"><div class="legend-dot" style="background:var(--cyan)"></div>Scholar</div>
-                <div class="legend-item"><div class="legend-dot" style="background:var(--teal)"></div>Corporate</div>
-                <div class="legend-item"><div class="legend-dot" style="background:var(--purple)"></div>Airport</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- BOOKINGS PANEL (hidden) -->
-        <div id="bookings-dash" style="display:none">
-          <div style="font-size:10px;color:var(--muted);letter-spacing:0.08em;margin-bottom:16px;">TODAY'S BOOKINGS</div>
-          <div style="display:flex;flex-direction:column;gap:8px;">
-            <div style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:8px;border:1px solid rgba(0,229,255,0.1);background:rgba(0,229,255,0.03);">
-              <div style="width:8px;height:8px;border-radius:50%;background:var(--teal)"></div>
-              <div style="font-size:11px;flex:1">Scholar Route — Summerstrand → Lorraine Primary</div>
-              <div style="font-size:10px;color:var(--muted)">07:15 AM</div>
-              <span class="tag-pill tag-both">CONFIRMED</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:8px;border:1px solid rgba(0,229,255,0.1);background:rgba(0,229,255,0.03);">
-              <div style="width:8px;height:8px;border-radius:50%;background:var(--gold)"></div>
-              <div style="font-size:11px;flex:1">Airport Transfer — PE City → PE Airport</div>
-              <div style="font-size:10px;color:var(--muted)">10:30 AM</div>
-              <span class="tag-pill tag-t3">IN PROGRESS</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:8px;border:1px solid rgba(0,229,255,0.1);background:rgba(0,229,255,0.03);">
-              <div style="width:8px;height:8px;border-radius:50%;background:var(--cyan)"></div>
-              <div style="font-size:11px;flex:1">Corporate Event — Walmer → Blue Waters Hotel</div>
-              <div style="font-size:10px;color:var(--muted)">06:00 PM</div>
-              <span class="tag-pill" style="background:rgba(139,92,246,0.1);color:var(--purple);border:1px solid rgba(139,92,246,0.2)">UPCOMING</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:8px;border:1px solid rgba(0,229,255,0.1);background:rgba(0,229,255,0.03);">
-              <div style="width:8px;height:8px;border-radius:50%;background:var(--muted)"></div>
-              <div style="font-size:11px;flex:1">Scholar Route — Walmer → Grey High School</div>
-              <div style="font-size:10px;color:var(--muted)">07:00 AM</div>
-              <span class="tag-pill tag-both">COMPLETED</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- REVENUE PANEL (hidden) -->
-        <div id="revenue-dash" style="display:none">
-          <div style="font-size:10px;color:var(--muted);letter-spacing:0.08em;margin-bottom:16px;">ROUTE PROFITABILITY</div>
-          <table style="width:100%;border-collapse:collapse;">
-            <tr style="font-size:9px;color:var(--muted);letter-spacing:0.1em;">
-              <th style="text-align:left;padding:6px 10px;border-bottom:1px solid var(--border)">ROUTE</th>
-              <th style="padding:6px 10px;border-bottom:1px solid var(--border)">REVENUE</th>
-              <th style="padding:6px 10px;border-bottom:1px solid var(--border)">COSTS</th>
-              <th style="padding:6px 10px;border-bottom:1px solid var(--border)">PROFIT</th>
-            </tr>
-            <tr style="font-size:11px;border-bottom:1px solid rgba(255,255,255,0.04)">
-              <td style="padding:10px;color:var(--text)">Summerstrand → Lorraine</td>
-              <td style="padding:10px;text-align:center;color:var(--teal)">R8,000</td>
-              <td style="padding:10px;text-align:center;color:var(--muted)">R1,200</td>
-              <td style="padding:10px;text-align:center;color:var(--cyan);font-weight:700">R6,800 ✅</td>
-            </tr>
-            <tr style="font-size:11px;border-bottom:1px solid rgba(255,255,255,0.04)">
-              <td style="padding:10px;color:var(--text)">Walmer → Grey High</td>
-              <td style="padding:10px;text-align:center;color:var(--teal)">R5,000</td>
-              <td style="padding:10px;text-align:center;color:var(--muted)">R1,500</td>
-              <td style="padding:10px;text-align:center;color:var(--gold)">R3,500 ⚠️</td>
-            </tr>
-            <tr style="font-size:11px;border-bottom:1px solid rgba(255,255,255,0.04)">
-              <td style="padding:10px;color:var(--text)">Newton Park → Alex Rd</td>
-              <td style="padding:10px;text-align:center;color:var(--teal)">R3,000</td>
-              <td style="padding:10px;text-align:center;color:var(--muted)">R1,800</td>
-              <td style="padding:10px;text-align:center;color:var(--red)">R1,200 ⚠️</td>
-            </tr>
-            <tr style="font-size:11px">
-              <td style="padding:10px;color:var(--text)">PE → Airport (avg)</td>
-              <td style="padding:10px;text-align:center;color:var(--teal)">R450/trip</td>
-              <td style="padding:10px;text-align:center;color:var(--muted)">R150</td>
-              <td style="padding:10px;text-align:center;color:var(--cyan);font-weight:700">R300 ✅</td>
-            </tr>
-          </table>
-        </div>
-
-        <!-- REVIEWS PANEL -->
-        <div id="reviews-dash" style="display:none">
-          <div style="font-size:10px;color:var(--muted);letter-spacing:0.08em;margin-bottom:16px;">REPUTATION DASHBOARD</div>
-          <div class="dash-kpis">
-            <div class="kpi"><div class="kpi-label">GOOGLE RATING</div><div class="kpi-val" style="color:var(--gold);">4.7★</div><div class="kpi-delta up">34 reviews</div></div>
-            <div class="kpi"><div class="kpi-label">FACEBOOK</div><div class="kpi-val" style="color:var(--cyan);">4.9★</div><div class="kpi-delta up">18 reviews</div></div>
-            <div class="kpi"><div class="kpi-label">RESPONSE RATE</div><div class="kpi-val" style="color:var(--teal);">100%</div><div class="kpi-delta up">vs 30% competitors</div></div>
-          </div>
-          <div style="margin-top:16px;display:flex;flex-direction:column;gap:8px;">
-            <div style="padding:12px;border-radius:8px;border:1px solid rgba(0,196,167,0.15);background:rgba(0,196,167,0.04);">
-              <div style="font-size:10px;color:var(--gold);margin-bottom:4px;">★★★★★ Sarah M. — 2 days ago</div>
-              <div style="font-size:11px;color:var(--text);line-height:1.6">"My daughter looks forward to her morning rides. Always on time, always friendly!"</div>
-              <div style="font-size:10px;color:var(--teal);margin-top:6px;">✓ AI response drafted — awaiting approval</div>
-            </div>
-            <div style="padding:12px;border-radius:8px;border:1px solid rgba(255,77,106,0.15);background:rgba(255,77,106,0.04);">
-              <div style="font-size:10px;color:var(--red);margin-bottom:4px;">★★☆☆☆ Anon — 1 week ago</div>
-              <div style="font-size:11px;color:var(--text);line-height:1.6">"Driver was 10 minutes late twice last week."</div>
-              <div style="font-size:10px;color:var(--red);margin-top:6px;">🚨 Urgent: Personal call recommended — AI response ready</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Customers/Routes stubs -->
-        <div id="customers-dash" style="display:none">
-          <div style="font-size:10px;color:var(--muted);letter-spacing:0.08em;margin-bottom:20px;">TOP CUSTOMERS BY LIFETIME VALUE</div>
-          <div style="display:flex;flex-direction:column;gap:8px;">
-            <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;background:rgba(255,255,255,0.02);border:1px solid var(--border)">
-              <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--teal));display:flex;align-items:center;justify-content:center;font-size:11px;color:#000;font-weight:700">🥇</div>
-              <div style="flex:1"><div style="font-size:11px;color:var(--text)">Thompson Family</div><div style="font-size:10px;color:var(--muted)">2 children · 18 months</div></div>
-              <div style="font-size:13px;color:var(--teal);font-weight:700">R27,000</div>
-              <span class="tag-pill" style="background:rgba(245,158,11,0.1);color:var(--gold);border:1px solid rgba(245,158,11,0.2);font-size:9px">PLATINUM</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;background:rgba(255,255,255,0.02);border:1px solid var(--border)">
-              <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),var(--purple));display:flex;align-items:center;justify-content:center;font-size:11px;color:#000;font-weight:700">🥈</div>
-              <div style="flex:1"><div style="font-size:11px;color:var(--text)">Mthembu Corp</div><div style="font-size:10px;color:var(--muted)">6 events · this year</div></div>
-              <div style="font-size:13px;color:var(--teal);font-weight:700">R18,000</div>
-              <span class="tag-pill tag-t3" style="font-size:9px">GOLD</span>
-            </div>
-            <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;background:rgba(255,255,255,0.02);border:1px solid var(--border)">
-              <div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--cyan));display:flex;align-items:center;justify-content:center;font-size:11px;color:#000;font-weight:700">🥉</div>
-              <div style="flex:1"><div style="font-size:11px;color:var(--text)">De Villiers, K.</div><div style="font-size:10px;color:var(--muted)">8 airport transfers · always tips</div></div>
-              <div style="font-size:13px;color:var(--teal);font-weight:700">R4,500</div>
-              <span class="tag-pill tag-t2" style="font-size:9px">SILVER</span>
-            </div>
-          </div>
-        </div>
-        <div id="routes-dash" style="display:none">
-          <div style="padding:40px;text-align:center;color:var(--muted);font-size:12px;">
-            🗺️ Route optimisation map loads here<br><span style="font-size:10px;opacity:.6">GPS integration • Real-time tracking • ETA calculations</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- WHATSAPP DEMO -->
-  <div style="margin-top:60px">
-    <div class="section-label">WHATSAPP AUTOMATION DEMO</div>
-    <p style="font-size:12px;color:var(--muted);margin-bottom:8px;max-width:500px;line-height:1.8">
-      Click the buttons in the chat below to see how the automated WhatsApp booking flow works in real time.
-    </p>
-  </div>
-
-  <div class="chat-demo">
-    <div class="chat-header">
-      <div class="chat-avatar">🚐</div>
-      <div>
-        <div class="chat-name">Transport Shuttle OS <span style="color:var(--teal);font-size:10px">✓ Official Business</span></div>
-        <div class="chat-status">● Online — responds in under 3 seconds</div>
-      </div>
-    </div>
-    <div class="chat-messages" id="chat-messages">
-      <div class="msg incoming">
-        Hi! 👋 Thank you for contacting Transport Shuttle OS. We specialize in scholar transport, corporate events, and airport transfers. How can we help you today?
-        <div class="msg-buttons">
-          <button class="msg-btn" onclick="chatStep('scholar')">🎒 Scholar Transport</button>
-          <button class="msg-btn" onclick="chatStep('corporate')">💼 Corporate</button>
-          <button class="msg-btn" onclick="chatStep('airport')">✈️ Airport Transfer</button>
-        </div>
-      </div>
-    </div>
-    <div class="chat-input-row">
-      <input class="chat-input" placeholder="Type a message or click a button above..." readonly>
-      <button class="chat-send-btn">➤</button>
-    </div>
-  </div>
-</div>
-
-<!-- PRICING -->
-<div class="section-anchor" id="pricing"></div>
-<div class="pricing-section fade-in">
-  <div style="max-width:1000px;margin:0 auto">
-    <div class="section-label">INVESTMENT</div>
-    <div class="section-title">Choose your<br><em>transformation.</em></div>
-    <div class="pricing-grid">
-      <!-- TIER 2 -->
-      <div class="price-card">
-        <div class="price-tier">TIER 2</div>
-        <div class="price-name" style="color:var(--cyan)">Growth System</div>
-        <div class="price-tagline">Foundation + Smart Automation</div>
-        <div class="price-amount" style="color:var(--cyan)"><sup>R</sup>61,500</div>
-        <div class="price-period">once-off investment</div>
-        <div class="price-divider"></div>
-        <div class="price-feature"><span class="check">✓</span><span>5-page professional website (all 3 services)</span></div>
-        <div class="price-feature"><span class="check">✓</span><span>Notion business management hub</span></div>
-        <div class="price-feature"><span class="check">✓</span><span>Supabase booking system + API integration</span></div>
-        <div class="price-feature"><span class="check">✓</span><span>24/7 AI chatbot (rule-based)</span></div>
-        <div class="price-feature"><span class="check">✓</span><span>60 posts automated social media (3 months)</span></div>
-        <div class="price-feature"><span class="check">✓</span><span>Google Business optimization + local SEO</span></div>
-        <div class="price-feature"><span class="check">✓</span><span>4-hour training + 30-day support</span></div>
-        <div class="price-divider"></div>
-        <div style="font-size:10px;color:var(--muted);margin-bottom:8px;letter-spacing:0.06em">PAYMENT OPTIONS</div>
-        <div style="font-size:11px;color:var(--text)">50/30/20 split or 30/30/40 milestone payments</div>
-        <div style="font-size:10px;color:var(--muted);margin-top:4px">Optional: +R3,500/month retainer</div>
-        <button class="price-cta t2" onclick="openModal('contact-t2')">Start with Tier 2</button>
-      </div>
-
-      <!-- TIER 3 -->
-      <div class="price-card featured">
-        <div class="price-tier">TIER 3</div>
-        <div class="price-name" style="color:var(--purple)">Vision System</div>
-        <div class="price-tagline">12-Month Digital Transformation Partnership</div>
-        <div class="price-amount" style="color:var(--purple)"><sup>R</sup>131,500</div>
-        <div class="price-period">+ R5,500/month × 12 months</div>
-        <div class="price-divider"></div>
-        <div class="price-feature"><span class="check" style="color:var(--purple)">✓</span><span>Everything in Tier 2</span></div>
-        <div class="price-feature"><span class="check" style="color:var(--purple)">✓</span><span>WhatsApp Business API (verified green tick)</span></div>
-        <div class="price-feature"><span class="check" style="color:var(--purple)">✓</span><span>GPT-powered AI chatbot (multilingual)</span></div>
-        <div class="price-feature"><span class="check" style="color:var(--purple)">✓</span><span>Predictive analytics + revenue forecasting</span></div>
-        <div class="price-feature"><span class="check" style="color:var(--purple)">✓</span><span>Automated reputation management</span></div>
-        <div class="price-feature"><span class="check" style="color:var(--purple)">✓</span><span>Dynamic pricing engine (surge + loyalty)</span></div>
-        <div class="price-feature"><span class="check" style="color:var(--purple)">✓</span><span>Customer loyalty program (Bronze→Platinum)</span></div>
-        <div class="price-feature"><span class="check" style="color:var(--purple)">✓</span><span>Driver mobile app (optional add-on)</span></div>
-        <div class="price-feature"><span class="check" style="color:var(--purple)">✓</span><span>Strategic partnership (15% referral + co-marketing)</span></div>
-        <div class="price-divider"></div>
-        <div style="font-size:10px;color:var(--muted);margin-bottom:8px;letter-spacing:0.06em">PAYMENT STRUCTURE</div>
-        <div style="font-size:11px;color:var(--text)">30% deposit (R39,450) → 30% Phase 1 (R39,450) → 40% Phases 2–3 (R52,600)</div>
-        <button class="price-cta t3" onclick="openModal('contact-t3')">Unlock the Vision</button>
-      </div>
-    </div>
-
-    <!-- PAYMENT TIMELINE -->
-    <div class="timeline-steps">
-      <div class="t-step s1">
-        <div class="t-dot">1</div>
-        <div class="t-label"><strong>Deposit</strong>R39,450 (30%)<br>Work begins</div>
-      </div>
-      <div class="t-step s2">
-        <div class="t-dot">2</div>
-        <div class="t-label"><strong>Phase 1 Complete</strong>R39,450 (30%)<br>Week 6</div>
-      </div>
-      <div class="t-step s3">
-        <div class="t-dot">3</div>
-        <div class="t-label"><strong>Phase 2 Milestones</strong>R26,300 (20%)<br>Month 3–6</div>
-      </div>
-      <div class="t-step s4">
-        <div class="t-dot">4</div>
-        <div class="t-label"><strong>Phase 3 Complete</strong>R26,300 (20%)<br>Month 12</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ROI SECTION -->
-<div class="section-anchor" id="roi"></div>
-<div class="section fade-in">
-  <div class="section-label">VALUE BREAKDOWN</div>
-  <div class="section-title">What you get.<br><em>What it's worth.</em></div>
-
-  <div class="tabs">
-    <button class="tab-btn active" onclick="switchTab('tab-t2')">TIER 2 BREAKDOWN</button>
-    <button class="tab-btn" onclick="switchTab('tab-t3')">TIER 3 BREAKDOWN</button>
-    <button class="tab-btn" onclick="switchTab('tab-retainer')">RETAINER DETAILS</button>
-  </div>
-
-  <div class="tab-panel active" id="tab-t2">
-    <table class="roi-table">
-      <thead>
-        <tr>
-          <th>COMPONENT</th>
-          <th>TIER</th>
-          <th>STANDARD RATE</th>
-          <th>INCLUDED ✓</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td class="feature-name">Professional 5-Page Website</td><td><span class="tag-pill tag-both">BOTH</span></td><td class="rate">R12,000</td><td>✓</td></tr>
-        <tr><td class="feature-name">Notion Business Management System</td><td><span class="tag-pill tag-both">BOTH</span></td><td class="rate">R5,000</td><td>✓</td></tr>
-        <tr><td class="feature-name">Automated Booking System (Supabase)</td><td><span class="tag-pill tag-t2">TIER 2</span></td><td class="rate">R12,000</td><td>✓</td></tr>
-        <tr><td class="feature-name">Notion API Integration</td><td><span class="tag-pill tag-t2">TIER 2</span></td><td class="rate">R8,000</td><td>✓</td></tr>
-        <tr><td class="feature-name">24/7 AI Chatbot</td><td><span class="tag-pill tag-t2">TIER 2</span></td><td class="rate">R5,000</td><td>✓</td></tr>
-        <tr><td class="feature-name">Automated Social Media (60 posts + scheduling)</td><td><span class="tag-pill tag-t2">TIER 2</span></td><td class="rate">R6,000</td><td>✓</td></tr>
-        <tr><td class="feature-name">Google Business Optimization</td><td><span class="tag-pill tag-both">BOTH</span></td><td class="rate">R2,500</td><td>✓</td></tr>
-        <tr><td class="feature-name">Training & Support (4 hours + 30 days)</td><td><span class="tag-pill tag-both">BOTH</span></td><td class="rate">R3,000</td><td>✓</td></tr>
-      </tbody>
-    </table>
-    <div class="savings-banner">
-      <div>
-        <div class="savings-val">R61,500</div>
-        <div class="savings-label">TIER 2 TOTAL PACKAGE VALUE</div>
-      </div>
-      <div style="flex:1;border-left:1px solid var(--border);padding-left:24px;">
-        <div style="font-size:11px;color:var(--muted);line-height:1.8">Standard market rate: <span style="color:var(--teal);font-weight:700;">R61,500</span></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="tab-panel" id="tab-t3">
-    <table class="roi-table">
-      <thead>
-        <tr>
-          <th>COMPONENT</th>
-          <th>TIER</th>
-          <th>STANDARD RATE</th>
-          <th>INCLUDED ✓</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td class="feature-name">Everything in Tier 2</td><td><span class="tag-pill tag-t3">T3</span></td><td class="rate">R61,500</td><td>✓</td></tr>
-        <tr><td class="feature-name">WhatsApp Business API Integration</td><td><span class="tag-pill tag-t3">T3</span></td><td class="rate">R15,000</td><td>✓</td></tr>
-        <tr><td class="feature-name">Advanced AI Chatbot (OpenAI GPT)</td><td><span class="tag-pill tag-t3">T3</span></td><td class="rate">R12,000</td><td>✓</td></tr>
-        <tr><td class="feature-name">Predictive Analytics Dashboard</td><td><span class="tag-pill tag-t3">T3</span></td><td class="rate">R10,000</td><td>✓</td></tr>
-        <tr><td class="feature-name">Automated Reputation System</td><td><span class="tag-pill tag-t3">T3</span></td><td class="rate">R6,000</td><td>✓</td></tr>
-        <tr><td class="feature-name">Dynamic Pricing Engine</td><td><span class="tag-pill tag-t3">T3</span></td><td class="rate">R8,000</td><td>✓</td></tr>
-        <tr><td class="feature-name">Customer Loyalty Program</td><td><span class="tag-pill tag-t3">T3</span></td><td class="rate">R7,000</td><td>✓</td></tr>
-        <tr><td class="feature-name">Driver Mobile App (optional)</td><td><span class="tag-pill tag-t3">T3</span></td><td class="rate">R12,000</td><td>✓</td></tr>
-        <tr><td class="feature-name">12-Month Retainer (R5,500 × 12)</td><td><span class="tag-pill tag-t3">T3</span></td><td class="rate">R66,000</td><td>✓</td></tr>
-      </tbody>
-    </table>
-    <div class="savings-banner" style="border-color:rgba(139,92,246,0.25);background:rgba(139,92,246,0.04);">
-      <div>
-        <div class="savings-val" style="background:linear-gradient(135deg,var(--purple),var(--gold));-webkit-background-clip:text;">R197,500+</div>
-        <div class="savings-label">TIER 3 TOTAL PACKAGE VALUE</div>
-      </div>
-      <div style="flex:1;border-left:1px solid var(--border);padding-left:24px;">
-        <div style="font-size:11px;color:var(--muted);line-height:1.8">Standard market value: <span style="color:var(--text);">R197,500+</span><br>Year 1 total (setup + retainer): <span style="color:var(--purple);font-weight:700;">R197,500+</span></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="tab-panel" id="tab-retainer">
-    <div class="feature-grid" style="margin-top:0">
-      <div class="feature-tile">
-        <div class="feature-tile-icon">🔧</div>
-        <div class="feature-tile-title">Technical Maintenance</div>
-        <div class="feature-tile-desc">Monthly security updates, speed optimization, backup verification, system enhancements, 1 major new feature per quarter.</div>
-      </div>
-      <div class="feature-tile">
-        <div class="feature-tile-icon">📝</div>
-        <div class="feature-tile-title">Content & Marketing</div>
-        <div class="feature-tile-desc">12 new social posts/month, 2 SEO blog posts, email newsletter to customer list, seasonal campaign design.</div>
-      </div>
-      <div class="feature-tile">
-        <div class="feature-tile-icon">📞</div>
-        <div class="feature-tile-title">Strategic Consulting</div>
-        <div class="feature-tile-desc">45-min monthly video call, quarterly 90-min deep-dive review, annual half-day planning session. You're never flying blind.</div>
-      </div>
-      <div class="feature-tile">
-        <div class="feature-tile-icon">🚨</div>
-        <div class="feature-tile-title">Priority Support</div>
-        <div class="feature-tile-desc">4-hour response on weekdays, same-day on weekends for emergencies. Site down? Fixed immediately. System glitch? Resolved same day.</div>
-      </div>
-      <div class="feature-tile">
-        <div class="feature-tile-icon">📈</div>
-        <div class="feature-tile-title">Analytics Reporting</div>
-        <div class="feature-tile-desc">Monthly dashboard: traffic, conversions, booking trends, revenue vs target, customer acquisition cost, review sentiment.</div>
-      </div>
-      <div class="feature-tile">
-        <div class="feature-tile-icon">🎯</div>
-        <div class="feature-tile-title">Competitor Intelligence</div>
-        <div class="feature-tile-desc">Track competitor pricing and positioning. Real-time alerts when competitors change rates. Strategic recommendations to stay ahead.</div>
-      </div>
-    </div>
-    <div style="margin-top:24px;padding:20px 24px;border-radius:12px;border:1px solid var(--border);background:rgba(0,229,255,0.03);display:flex;align-items:center;gap:20px;flex-wrap:wrap">
-      <div>
-        <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--teal)">R3,500<span style="font-size:14px;color:var(--muted)">/month</span></div>
-        <div style="font-size:10px;color:var(--muted);letter-spacing:0.06em">TIER 2 OPTIONAL RETAINER</div>
-      </div>
-      <div style="width:1px;height:48px;background:var(--border)"></div>
-      <div>
-        <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--purple)">R5,500<span style="font-size:14px;color:var(--muted)">/month</span></div>
-        <div style="font-size:10px;color:var(--muted);letter-spacing:0.06em">TIER 3 INCLUDED RETAINER</div>
-      </div>
-      <div style="flex:1;font-size:11px;color:var(--muted);line-height:1.8;min-width:200px">
-        Cancel anytime with 30 days notice.<br>
-        Tier 3 retainer included in the partnership.
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- FOOTER -->
-<footer>
-  <div class="footer-logo">TRANSPORT SHUTTLE OS</div>
-  <div class="footer-tagline">Powered by Mirembe Muse · East London, South Africa</div>
-  <div class="footer-links">
-    <span class="footer-link">hello@mirembemuse.co.za</span>
-    <span class="footer-link">084 291 6742</span>
-    <span class="footer-link" onclick="scrollTo('#overview')">Back to top ↑</span>
-  </div>
-  <div class="footer-copy">© 2024 Mirembe Muse. All rights reserved.</div>
-</footer>
-
-<!-- ===== MODALS ===== -->
-<div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
-  <div class="modal" id="modal-content">
-    <button class="modal-close" onclick="closeModal()">✕</button>
-    <div id="modal-inner"></div>
-  </div>
-</div>
-
 <script>
-// ===== SCROLL UTILITY =====
-function scrollTo(id) {
-  document.querySelector(id).scrollIntoView({behavior:'smooth'});
-  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
-}
-
-// ===== PHASE TOGGLE =====
-function togglePhase(id) {
-  const card = document.getElementById(id);
-  card.classList.toggle('open');
-}
-
-// ===== TIER TOGGLE =====
-function setTier(n) {
-  document.querySelectorAll('.tier-btn').forEach(b=>b.classList.remove('active'));
-  document.querySelector('.tier-btn.t'+n).classList.add('active');
-}
-
-// ===== DASH SWITCH =====
-function switchDash(id) {
-  document.querySelectorAll('[id$="-dash"]').forEach(p=>p.style.display='none');
-  document.getElementById(id).style.display='block';
-  document.querySelectorAll('.dash-nav-item').forEach(i=>i.classList.remove('active'));
-  event.currentTarget.classList.add('active');
-}
-
-// ===== KPI PULSE =====
-function pulseKpi(el) {
-  el.style.transform='scale(1.05)';
-  el.style.borderColor='rgba(0,229,255,0.4)';
-  setTimeout(()=>{el.style.transform='';el.style.borderColor='';},300);
-}
-
-// ===== TABS =====
-function switchTab(id) {
-  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  event.currentTarget.classList.add('active');
-}
-
-// ===== CHAT DEMO =====
-const chatFlows = {
-  scholar: [
-    {from:'out', text:'🎒 Scholar Transport'},
-    {from:'in', text:'Great! We\'d love to help with scholar transport. Which area are you in?', buttons:[
-      {label:'Summerstrand', next:'summerstrand'},
-      {label:'Walmer', next:'walmer'},
-      {label:'Lorraine', next:'lorraine'},
-      {label:'Other', next:'other-area'}
-    ]}
-  ],
-  summerstrand: [
-    {from:'out', text:'Summerstrand'},
-    {from:'in', text:'Perfect! We service Summerstrand daily. Which school?', buttons:[
-      {label:'Lorraine Primary', next:'book-scholar'},
-      {label:'Grey High', next:'book-scholar'},
-      {label:'Alexander Road', next:'book-scholar'},
-      {label:'Other', next:'book-scholar'}
-    ]}
-  ],
-  'book-scholar': [
-    {from:'out', text:'Lorraine Primary'},
-    {from:'in', text:'✅ Great choice! Our Summerstrand → Lorraine route runs at 07:15 AM daily. For 1 child: R1,000/month. Would you like to book a trial week for R150?', buttons:[
-      {label:'Book Trial Week', next:'confirmed'},
-      {label:'Get Full Quote', next:'confirmed'}
-    ]}
-  ],
-  confirmed: [
-    {from:'out', text:'Book Trial Week'},
-    {from:'in', text:'🎉 Booking confirmed! You\'ll receive a WhatsApp reminder the night before. See you Monday morning at 07:15 AM! 🚐\n\nBooking Ref: #TSO-2024-0847'}
-  ],
-  walmer: [
-    {from:'out', text:'Walmer'},
-    {from:'in', text:'We cover Walmer! Which school?', buttons:[
-      {label:'Grey High', next:'book-scholar'},
-      {label:'Collegiate', next:'book-scholar'}
-    ]}
-  ],
-  lorraine: [
-    {from:'out', text:'Lorraine'},
-    {from:'in', text:'Lorraine is one of our busiest routes! Which school?', buttons:[
-      {label:'Lorraine Primary', next:'book-scholar'},
-      {label:'Woodridge', next:'book-scholar'}
-    ]}
-  ],
-  'other-area': [
-    {from:'out', text:'Other'},
-    {from:'in', text:'No problem! Drop me your suburb and I\'ll check coverage. What\'s your area?'}
-  ],
-  corporate: [
-    {from:'out', text:'💼 Corporate'},
-    {from:'in', text:'Excellent! How many people are we transporting?', buttons:[
-      {label:'Up to 14', next:'corp-small'},
-      {label:'15–28', next:'corp-large'},
-      {label:'Custom', next:'corp-custom'}
-    ]}
-  ],
-  'corp-small': [
-    {from:'out', text:'Up to 14'},
-    {from:'in', text:'Perfect — 1 Quantum handles that comfortably. What\'s the event date and pickup location?'}
-  ],
-  'corp-large': [
-    {from:'out', text:'15–28'},
-    {from:'in', text:'We\'ll dispatch both Quantums — 28 seats total. Volume discount applies! From R4,000 for both vehicles. What\'s your event?'}
-  ],
-  'corp-custom': [
-    {from:'out', text:'Custom group size'},
-    {from:'in', text:'No problem! Send us your headcount and event details and we\'ll put together a custom quote within 2 hours. 📋'}
-  ],
-  airport: [
-    {from:'out', text:'✈️ Airport Transfer'},
-    {from:'in', text:'Which airport are you travelling to/from?', buttons:[
-      {label:'PE Airport', next:'pe-airport'},
-      {label:'East London Airport', next:'el-airport'}
-    ]}
-  ],
-  'pe-airport': [
-    {from:'out', text:'PE Airport'},
-    {from:'in', text:'PE Airport transfers from R350. We monitor your flight in real-time for delays. What\'s your flight date and number?'}
-  ],
-  'el-airport': [
-    {from:'out', text:'East London Airport'},
-    {from:'in', text:'East London Airport transfers from R450. We cover PE → EL and return trips. Early-bird discount: book 2+ weeks ahead for 10% off! 🎉'}
-  ]
-};
-
-function chatStep(key) {
-  const flow = chatFlows[key];
-  if (!flow) return;
-  const container = document.getElementById('chat-messages');
-  flow.forEach((msg, i) => {
-    setTimeout(()=>{
-      const div = document.createElement('div');
-      div.className = 'msg ' + (msg.from === 'in' ? 'incoming' : 'outgoing');
-      div.style.whiteSpace = 'pre-line';
-      div.textContent = msg.text;
-      if (msg.buttons) {
-        const btns = document.createElement('div');
-        btns.className = 'msg-buttons';
-        msg.buttons.forEach(b => {
-          const btn = document.createElement('button');
-          btn.className = 'msg-btn';
-          btn.textContent = b.label;
-          btn.onclick = () => chatStep(b.next);
-          btns.appendChild(btn);
-        });
-        div.appendChild(btns);
-      }
-      container.appendChild(div);
-      container.scrollTop = container.scrollHeight;
-    }, i * 600);
+  window.addEventListener('scroll', () => {
+    const doc = document.documentElement;
+    const scrolled = doc.scrollTop;
+    const height = doc.scrollHeight - doc.clientHeight;
+    document.getElementById('scrollBar').style.width = (scrolled / height * 100) + '%';
   });
-}
-
-// ===== MODAL DATA =====
-const modals = {
-  website: {
-    title:'5-Page Professional Website',
-    tag:'BOTH TIERS', tagStyle:'tag-both',
-    desc:'Your digital storefront, built to convert parents and corporates into paying customers. Every page is SEO-optimised and designed around your three service lines.',
-    features:['🏠 Home page with hero, testimonials, social proof', '🎒 Scholar Transport: safety, routes, pricing, booking CTA', '💼 Corporate Events: capacity, packages, inquiry form', '✈️ Airport Transfers: rates, flight tracking feature, booking form', '📞 Contact: WhatsApp link, Google Maps, hours', '📱 Fully mobile-responsive', '⚡ Fast-loading (Core Web Vitals optimised)']
-  },
-  notion: {
-    title:'Notion Business Management Hub',
-    tag:'BOTH TIERS', tagStyle:'tag-both',
-    desc:'Your entire business in one workspace. Bookings, finances, vehicle schedules, customer records, and route planning — all connected and accessible from your phone.',
-    features:['📅 Booking database with filtering and views', '💰 Financial dashboard (revenue, costs, profit per route)', '🚐 Vehicle maintenance tracker with alerts', '👥 Customer CRM (history, preferences, VIP tags)', '🗺️ Route planner with capacity tracking', '📱 Mobile app access (manage on-the-go)', '🔔 Automated reminders piped from booking system']
-  },
-  booking: {
-    title:'Automated Booking System',
-    tag:'TIER 2 & 3', tagStyle:'tag-t2',
-    desc:'Supabase-powered real-time booking engine. Customers book online, receive instant confirmations, and you never touch a spreadsheet again.',
-    features:['⚡ Instant email + WhatsApp confirmations', '🔄 Recurring bookings for scholar transport', '🛫 Flight tracking for airport transfers', '📆 Calendar invites sent automatically', '💳 Online payment integration (optional)', '📊 Admin dashboard: revenue, capacity, upcoming trips', '🔔 24h automated reminders to customers']
-  },
-  notionapi: {
-    title:'Notion API Integration',
-    tag:'TIER 2 & 3', tagStyle:'tag-t2',
-    desc:'The glue that connects your website, booking system, and Notion hub. A booking happens online — it appears everywhere instantly.',
-    features:['🔗 Website booking → Supabase → Notion → WhatsApp', '📤 Auto-send reminders without manual work', '💸 Payment follow-ups for unpaid bookings', '🔧 Vehicle service alerts 30 & 7 days out', '📋 Driver assignment notifications', '📝 Review request automation (3h after trip)', '📆 Term-start notifications to all scholar parents']
-  },
-  chatbot: {
-    title:'24/7 AI Chatbot',
-    tag:'BOTH TIERS', tagStyle:'tag-both',
-    desc:'Never miss a lead again. Parents researching at 11 PM, corporates comparing at midnight — the chatbot answers instantly, captures contact details, and sends them to you.',
-    features:['💬 Answers 50+ common questions about all 3 services', '🎯 Smart lead capture when question is too complex', '📩 Sends inquiry details direct to your WhatsApp', '😊 Brand-voice trained (friendly but professional)', '📊 Analytics: most asked questions, conversion rate', '🌍 Optional Xhosa/Afrikaans language detection', '⏱️ Response time: under 3 seconds, 24/7/365']
-  },
-  social: {
-    title:'60-Post Social Media Package',
-    tag:'TIER 2+', tagStyle:'tag-t2',
-    desc:'Three months of professional content, designed and pre-scheduled across all platforms. You approve once, and it runs on autopilot.',
-    features:['📅 20 posts per service line (Scholar, Corporate, Airport)', '🎨 10+ branded Canva templates (your teal/purple palette)', '⏰ Optimal scheduling via Buffer/Hootsuite', '📱 Facebook, Instagram, LinkedIn, X/Twitter', '🔍 Hashtag strategy for local reach (#PETransport)', '#️⃣ Content calendar guide included', '🔄 Monthly refresh available on retainer']
-  },
-  google: {
-    title:'Google Business Optimization',
-    tag:'BOTH TIERS', tagStyle:'tag-both',
-    desc:'When a parent types "school transport near me" or a corporate searches "shuttle service PE" — you show up first, with 4.7 stars and a book now button.',
-    features:['📍 Complete profile (name, area, hours, services)', '🔍 Local keyword targeting for all 3 services', '⭐ Review request templates (WhatsApp + SMS)', '📝 Review response templates (positive & negative)', '📸 Professional photo upload strategy', '📊 Weekly review summary reports', '🎯 Competitor positioning benchmarks']
-  },
-  whatsapp: {
-    title:'WhatsApp Business API',
-    tag:'TIER 3 ONLY', tagStyle:'tag-t3',
-    desc:'The official WhatsApp Business API with green checkmark verification. 80% of your customer communication already happens in WhatsApp — this automates it completely.',
-    features:['✅ Official green checkmark (verified business)', '🤖 Smart quick-reply button flows', '📩 Instant booking confirmations via WhatsApp', '⏰ 24h trip reminder automation', '📢 Broadcast campaigns to segmented lists', '🎯 VIP-only and lapsed-customer targeting', '📊 Delivery and read receipt tracking']
-  },
-  gpt: {
-    title:'GPT-Powered AI Chatbot',
-    tag:'TIER 3 ONLY', tagStyle:'tag-t3',
-    desc:'Upgrade from rule-based to true intelligence. This bot understands complex multi-part questions, handles objections like a salesperson, and works in Xhosa and Afrikaans.',
-    features:['🧠 Natural language understanding (no keyword limits)', '💬 Context retention within conversation', '😤 Sentiment detection (urgent/frustrated customers)', '🌍 Multilingual: English, Xhosa, Afrikaans auto-detect', '🎯 Trained on your brand voice and pricing', '📞 Auto-alerts you when customer needs human follow-up', '📈 Closes leads 24/7 with personality-driven responses']
-  },
-  analytics: {
-    title:'Predictive Analytics Dashboard',
-    tag:'TIER 3 ONLY', tagStyle:'tag-t3',
-    desc:'Data tells you exactly where to focus, what to change, and how to grow. This is how R24,000/month businesses become R50,000/month businesses.',
-    features:['📊 Monthly revenue forecasting by service type', '🗺️ Route profitability report (revenue vs cost vs profit)', '🌟 VIP customer rankings with lifetime value', '📈 Seasonal trend analysis (YoY comparisons)', '🥊 Competitor benchmarking (vs Tide Waters + others)', '📤 Exportable PDF/Excel reports for accountant', '🎯 Monthly action items auto-generated from data']
-  },
-  reputation: {
-    title:'Automated Reputation Management',
-    tag:'TIER 3 ONLY', tagStyle:'tag-t3',
-    desc:'Happy customers rarely leave reviews. Unhappy ones always do. This system fixes that imbalance with perfect timing and early intervention.',
-    features:['⭐ Sentiment check 3h after every trip', '🎯 One-tap Google review link for happy customers', '🚨 Immediate owner alert for unhappy customers', '🤖 AI-drafted responses for all reviews (you approve)', '📊 Rating dashboard: Google, Facebook, all platforms', '💬 Common review theme analysis for marketing', '📈 Review velocity tracking + competitor comparison']
-  },
-  'pricing-engine': {
-    title:'Dynamic Pricing Engine',
-    tag:'TIER 3 ONLY', tagStyle:'tag-t3',
-    desc:'Airlines and Uber use dynamic pricing to maximise revenue. Now you do too — automatically, transparently, and profitably.',
-    features:['⬆️ Peak surge: Friday PM, Monday AM, public holidays', '⬇️ Off-peak discounts to fill empty slots', '🎁 Early-bird: 10% off for 2+ week advance bookings', '⏰ Last-minute premium: 10–25% late-booking fee', '📦 Volume discounts for corporate (auto-calculated)', '🏆 Loyalty tier pricing (Bronze → Platinum)', '👀 Competitor price monitoring with alerts']
-  },
-  loyalty: {
-    title:'Customer Loyalty Program',
-    tag:'TIER 3 ONLY', tagStyle:'tag-t3',
-    desc:'Loyalty programs increase customer lifetime value by 30–50%. A parent who would book 2 years now books 5 because they\'re "so close to Gold status."',
-    features:['💎 Bronze → Silver → Gold → Platinum tiers', '🎯 Points per booking (R10 = 1 point)', '👥 Referral bonus: 100 points per converted friend', '⭐ Review bonus: 50 points for Google review', '🎂 Birthday month: 2× point multiplier', '🏆 Rewards: free trips, discounts, VIP perks', '📱 Customer loyalty dashboard with gamification']
-  },
-  driver: {
-    title:'Driver Mobile App',
-    tag:'OPTIONAL ADD-ON', tagStyle:'',
-    desc:'For when you scale your fleet. Ensures every driver delivers your level of service — consistent, professional, traceable.',
-    features:['📋 Today\'s job assignments with full details', '🗺️ GPS navigation with optimised routes', '☎️ One-tap customer contact (call/WhatsApp)', '✅ Pre/during/post-trip quality checklists', '💰 Driver earnings tracking and breakdown', '📍 Real-time location visible to you (owner dashboard)', '🌟 Driver performance metrics (on-time %, rating)']
-  },
-  partnership: {
-    title:'Strategic Partnership',
-    tag:'TIER 3 EXCLUSIVE', tagStyle:'tag-t3',
-    desc:'The relationship continues beyond delivery. Your growth feeds Mirembe Muse, and Mirembe Muse feeds yours. Referrals, commissions, and co-marketing.',
-    features:['💰 15% referral commission on all referred projects', '🚐 QR code branding on both Quantums (tracked analytics)', '🌐 "Powered by Mirembe Muse" footer credit', '📲 Social cross-promotion every 5th post', '📚 20% commission on student planner template sales', '🤝 Joint content: case study blog + video testimonial', '🥇 First right of refusal on all new features']
-  },
-  'contact-t2': {
-    title:'Start with Tier 2 — Growth System',
-    tag:'R61,500', tagStyle:'tag-t2',
-    desc:'Ready to get started? Reach out to Nanda at Mirembe Muse. Work begins upon 50% deposit (R30,750).',
-    features:['📧 hello@mirembemuse.co.za', '📞 084 291 6742', '📍 East London, South Africa', '⏱️ Timeline: 5–6 weeks from deposit', '💳 Payment: 50/30/20 or 30/30/40', '💼 Standard market rate']
-  },
-  'contact-t3': {
-    title:'Unlock the Vision — Tier 3',
-    tag:'R131,500 + R5,500/month', tagStyle:'tag-t3',
-    desc:'The most complete digital transformation available in Eastern Cape transport. 12 months. 16 features. One strategic partnership.',
-    features:['📧 hello@mirembemuse.co.za', '📞 084 291 6742', '📍 East London, South Africa', '⏱️ Timeline: 12-month phased rollout', '💳 30% deposit (R39,450) to begin', '💼 Standard market rate']
-  }
-};
-
-function openModal(key) {
-  const m = modals[key];
-  if (!m) return;
-  const tagCls = m.tagStyle ? `class="modal-tag ${m.tagStyle}"` : `class="modal-tag" style="background:rgba(245,158,11,0.1);color:var(--gold);border:1px solid rgba(245,158,11,0.2)"`;
-  document.getElementById('modal-inner').innerHTML = `
-    <h3>${m.title}</h3>
-    <span ${tagCls}>${m.tag}</span>
-    <p>${m.desc}</p>
-    <div class="modal-features">
-      ${m.features.map(f=>`<div class="modal-feature"><span class="icon">${f.slice(0,2)}</span><span>${f.slice(2)}</span></div>`).join('')}
-    </div>
-  `;
-  document.getElementById('modal-overlay').classList.add('show');
-}
-function closeModal() {
-  document.getElementById('modal-overlay').classList.remove('show');
-}
-function closeModalOutside(e) {
-  if (e.target === document.getElementById('modal-overlay')) closeModal();
-}
-
-// ===== FADE IN ON SCROLL =====
-const observer = new IntersectionObserver(entries => {
-  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
-}, {threshold:0.1});
-document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
-
-// ===== NAV ACTIVE STATE =====
-window.addEventListener('scroll', () => {
-  const sections = ['overview','phases','dashboard','pricing','roi'];
-  const tabs = document.querySelectorAll('.nav-tab');
-  let current = 0;
-  sections.forEach((s,i) => {
-    const el = document.getElementById(s);
-    if (el && window.scrollY >= el.offsetTop - 100) current = i;
-  });
-  tabs.forEach((t,i) => t.classList.toggle('active', i === current));
-});
 </script>
+
 </body>
 </html>
