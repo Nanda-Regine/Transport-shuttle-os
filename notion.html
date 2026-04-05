@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notion Workspace — Transport Shuttle OS</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#03050a; --surface:#080c14; --card:#0d1220;
+  --border:rgba(0,229,255,0.08); --border2:rgba(0,229,255,0.14);
+  --cyan:#00e5ff; --teal:#00c4a7; --purple:#8b5cf6; --gold:#f59e0b;
+  --text:#e8edf5; --muted:#5a6a88; --muted2:#8a9ab8;
+  --green:#22c55e; --red:#ff4d6a; --orange:#f97316;
+
+  /* notion-specific surface */
+  --n-bg:#1e1e2e; --n-surface:#262637; --n-card:#2d2d42;
+  --n-border:rgba(255,255,255,0.06); --n-border2:rgba(255,255,255,0.1);
+  --n-text:#e2e8f0; --n-muted:#94a3b8; --n-muted2:#64748b;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;}
+body{background:var(--n-bg);color:var(--n-text);font-family:'DM Mono',monospace;display:flex;overflow:hidden;}
+
+/* ── NOTION SIDEBAR ── */
+.n-sidebar{width:240px;min-width:240px;background:var(--n-surface);border-right:1px solid var(--n-border);display:flex;flex-direction:column;height:100vh;overflow-y:auto;transition:transform 0.3s;}
+.n-workspace{padding:14px 16px;border-bottom:1px solid var(--n-border);display:flex;align-items:center;gap:8px;cursor:pointer;}
+.n-workspace-icon{font-size:1.1rem;}
+.n-workspace-name{font-family:'Syne',sans-serif;font-size:0.82rem;font-weight:700;color:var(--n-text);}
+.n-sidebar-pages{padding:8px 0;flex:1;}
+.n-page-item{display:flex;align-items:center;gap:8px;padding:6px 16px;cursor:pointer;color:var(--n-muted);font-size:0.72rem;border-radius:0;transition:background 0.15s;}
+.n-page-item:hover{background:rgba(255,255,255,0.04);color:var(--n-text);}
+.n-page-item.active{background:rgba(0,229,255,0.06);color:var(--cyan);}
+.n-page-icon{width:18px;text-align:center;font-size:0.9rem;}
+.n-add-page{display:flex;align-items:center;gap:8px;padding:6px 16px;cursor:pointer;color:var(--n-muted2);font-size:0.72rem;opacity:0.7;}
+.n-add-page:hover{opacity:1;color:var(--n-muted);}
+.n-sidebar-footer{padding:12px 16px;border-top:1px solid var(--n-border);}
+.n-sidebar-footer-text{font-size:0.6rem;color:var(--n-muted2);line-height:1.6;}
+.n-sidebar-footer-text a{color:var(--cyan);text-decoration:none;}
+
+/* ── MAIN ── */
+.n-main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;}
+
+/* ── NOTION TOP BAR ── */
+.n-topbar{background:var(--n-surface);border-bottom:1px solid var(--n-border);padding:8px 28px;display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.hamburger{display:none;background:none;border:none;color:var(--n-muted);font-size:1.2rem;cursor:pointer;padding:4px;}
+.n-breadcrumb{font-size:0.68rem;color:var(--n-muted);display:flex;align-items:center;gap:6px;flex:1;}
+.n-breadcrumb span{cursor:pointer;transition:color 0.15s;}
+.n-breadcrumb span:hover{color:var(--n-text);}
+.n-breadcrumb .sep{opacity:0.4;}
+.n-topbar-actions{display:flex;align-items:center;gap:8px;}
+.n-top-btn{background:transparent;border:1px solid var(--n-border2);color:var(--n-muted);font-family:'DM Mono',monospace;font-size:0.62rem;padding:5px 12px;border-radius:6px;cursor:pointer;transition:all 0.2s;}
+.n-top-btn:hover{background:rgba(255,255,255,0.05);color:var(--n-text);}
+.back-link-top{display:flex;align-items:center;gap:6px;text-decoration:none;color:var(--n-muted);font-size:0.65rem;transition:color 0.2s;white-space:nowrap;}
+.back-link-top:hover{color:var(--cyan);}
+
+/* ── CONTENT AREA ── */
+.n-content{flex:1;overflow-y:auto;padding:32px 48px 40px;position:relative;}
+
+/* ── DATABASE HEADER ── */
+.db-header{margin-bottom:20px;}
+.db-emoji{font-size:2.8rem;margin-bottom:8px;display:block;}
+.db-title{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:var(--n-text);margin-bottom:4px;}
+.db-sub{font-size:0.72rem;color:var(--n-muted);line-height:1.5;}
+
+/* ── DATABASE CONTROLS ── */
+.db-controls{display:flex;align-items:center;gap:10px;margin-bottom:0;border-bottom:1px solid var(--n-border);padding-bottom:0;}
+.view-tab{font-family:'DM Mono',monospace;font-size:0.68rem;padding:8px 16px;cursor:pointer;color:var(--n-muted);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all 0.15s;}
+.view-tab:hover{color:var(--n-text);}
+.view-tab.active{color:var(--n-text);border-bottom-color:var(--n-text);}
+.view-tab.active.cyan-tab{color:var(--cyan);border-bottom-color:var(--cyan);}
+.db-actions{margin-left:auto;display:flex;gap:6px;padding-bottom:8px;}
+.db-action-btn{background:transparent;border:1px solid var(--n-border2);color:var(--n-muted);font-family:'DM Mono',monospace;font-size:0.6rem;padding:4px 10px;border-radius:5px;cursor:pointer;transition:all 0.15s;}
+.db-action-btn:hover{background:rgba(255,255,255,0.04);color:var(--n-text);}
+
+/* ── VIEWS ── */
+.view-panel{display:none;padding-top:16px;}
+.view-panel.active{display:block;animation:fadeIn 0.2s ease;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+
+/* ── TABLE VIEW ── */
+.n-table{width:100%;border-collapse:collapse;font-size:0.7rem;}
+.n-table th{background:var(--n-surface);color:var(--n-muted);font-family:'DM Mono',monospace;font-size:0.6rem;text-transform:uppercase;letter-spacing:0.07em;padding:8px 12px;text-align:left;border:1px solid var(--n-border);cursor:pointer;user-select:none;white-space:nowrap;}
+.n-table th:hover{background:rgba(255,255,255,0.04);}
+.n-table td{padding:8px 12px;border:1px solid var(--n-border);color:var(--n-muted);vertical-align:middle;cursor:pointer;transition:background 0.12s;}
+.n-table tr:hover td{background:rgba(255,255,255,0.03);}
+.n-table tr.selected td{background:rgba(0,229,255,0.04);}
+.n-cell-main{color:var(--n-text);font-weight:500;display:flex;align-items:center;gap:8px;}
+.n-cell-main:hover{color:var(--cyan);}
+.row-expand{color:var(--n-muted2);font-size:0.8rem;opacity:0.6;}
+/* status pills */
+.s-active{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;font-size:0.62rem;background:rgba(34,197,94,0.12);color:#22c55e;}
+.s-confirmed{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;font-size:0.62rem;background:rgba(0,229,255,0.1);color:#00e5ff;}
+.s-pending{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;font-size:0.62rem;background:rgba(249,115,22,0.1);color:#f97316;}
+.s-completed{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;font-size:0.62rem;background:rgba(100,116,139,0.15);color:#94a3b8;}
+.wa-link{background:rgba(37,211,102,0.12);color:#25d366;border:none;border-radius:5px;padding:3px 8px;font-size:0.7rem;cursor:pointer;transition:background 0.15s;}
+.wa-link:hover{background:rgba(37,211,102,0.2);}
+.amount-cell{color:var(--cyan);font-weight:500;}
+
+/* ── BOARD VIEW ── */
+.board-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.board-col{background:var(--n-surface);border:1px solid var(--n-border);border-radius:8px;padding:12px;}
+.board-col-title{font-family:'DM Mono',monospace;font-size:0.62rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--n-muted);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.board-count{background:var(--n-card);color:var(--n-muted);width:16px;height:16px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:0.58rem;}
+.board-card{background:var(--n-card);border:1px solid var(--n-border);border-radius:6px;padding:10px;margin-bottom:8px;cursor:pointer;transition:border-color 0.15s;}
+.board-card:hover{border-color:var(--n-border2);}
+.bc-title{font-size:0.72rem;color:var(--n-text);font-weight:500;margin-bottom:4px;}
+.bc-sub{font-size:0.6rem;color:var(--n-muted);}
+.bc-amount{font-size:0.62rem;color:var(--cyan);margin-top:6px;}
+
+/* ── GALLERY VIEW ── */
+.gallery-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.gallery-card{background:var(--n-surface);border:1px solid var(--n-border);border-radius:8px;overflow:hidden;cursor:pointer;transition:border-color 0.15s;}
+.gallery-card:hover{border-color:var(--n-border2);}
+.gallery-card-top{height:70px;display:flex;align-items:center;justify-content:center;font-size:2rem;background:var(--n-card);}
+.gallery-card-body{padding:12px;}
+.gc-title{font-size:0.78rem;color:var(--n-text);font-weight:600;margin-bottom:3px;}
+.gc-sub{font-size:0.62rem;color:var(--n-muted);margin-bottom:8px;}
+.gc-amount{font-size:0.68rem;color:var(--cyan);}
+
+/* ── PROPERTY PANEL (slide-in) ── */
+.prop-panel{position:fixed;top:0;right:-420px;width:380px;height:100vh;background:var(--n-surface);border-left:1px solid var(--n-border2);z-index:500;display:flex;flex-direction:column;transition:right 0.3s ease;box-shadow:-20px 0 60px rgba(0,0,0,0.5);}
+.prop-panel.open{right:0;}
+.prop-panel-top{padding:20px;border-bottom:1px solid var(--n-border);display:flex;align-items:flex-start;justify-content:space-between;}
+.prop-emoji{font-size:2rem;display:block;margin-bottom:8px;}
+.prop-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;color:var(--n-text);}
+.prop-sub{font-size:0.65rem;color:var(--n-muted);margin-top:3px;}
+.prop-close{background:none;border:none;color:var(--n-muted);font-size:1.2rem;cursor:pointer;padding:4px;transition:color 0.15s;}
+.prop-close:hover{color:var(--n-text);}
+.prop-body{padding:20px;overflow-y:auto;flex:1;}
+.prop-section{margin-bottom:20px;}
+.prop-section-title{font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--n-muted2);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;}
+.prop-row{display:flex;align-items:center;padding:6px 0;border-bottom:1px solid var(--n-border);}
+.prop-row:last-child{border-bottom:none;}
+.prop-key{font-size:0.65rem;color:var(--n-muted);width:110px;flex-shrink:0;}
+.prop-val{font-size:0.7rem;color:var(--n-text);flex:1;}
+.prop-notes{background:var(--n-card);border:1px solid var(--n-border);border-radius:6px;padding:12px;font-size:0.7rem;color:var(--n-muted);line-height:1.65;margin-top:10px;}
+.prop-wa-btn{width:100%;background:rgba(37,211,102,0.12);border:1px solid rgba(37,211,102,0.2);color:#25d366;font-family:'DM Mono',monospace;font-size:0.7rem;padding:10px;border-radius:7px;cursor:pointer;margin-top:14px;transition:background 0.2s;}
+.prop-wa-btn:hover{background:rgba(37,211,102,0.2);}
+.prop-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:499;}
+.prop-overlay.show{display:block;}
+
+/* ── DATABASE SWITCHER ── */
+.current-db{display:none;}
+.current-db.active{display:block;}
+
+/* ── MOBILE OVERRIDES ── */
+@media(max-width:768px){
+  body{flex-direction:column;overflow:auto;}
+  .n-sidebar{position:fixed;top:0;left:0;z-index:800;transform:translateX(-100%);width:260px;}
+  .n-sidebar.open{transform:translateX(0);}
+  .n-main{height:auto;min-height:100vh;overflow:visible;}
+  .n-content{overflow:visible;padding:16px 12px 80px;}
+  .hamburger{display:flex;}
+  .gallery-grid{grid-template-columns:1fr 1fr;}
+  .board-grid{grid-template-columns:1fr 1fr;}
+  /* table scrolls horizontally */
+  .n-table{font-size:0.6rem;min-width:560px;}
+  [style*="overflow-x:auto"],[style*="overflow-x: auto"]{overflow-x:auto;}
+  .view-panel{overflow-x:auto;}
+  /* prop panel full-width slide-up from bottom */
+  .prop-panel{width:100%;right:unset !important;bottom:-100%;top:unset;left:0;height:85vh;border-left:none;border-top:1px solid var(--n-border2);border-radius:16px 16px 0 0;transition:bottom 0.3s ease;z-index:9500;}
+  .prop-panel.open{bottom:0 !important;right:unset !important;}
+  /* topbar tighten */
+  .n-topbar{padding:8px 12px;gap:8px;}
+  .n-breadcrumb{font-size:0.6rem;}
+  .db-actions{gap:4px;}
+  .db-action-btn{padding:4px 8px;font-size:0.55rem;}
+  /* page title smaller */
+  .n-page-title{font-size:1.4rem;}
+  .n-db-header{padding:12px 0 8px;}
+}
+@media(max-width:480px){
+  .gallery-grid{grid-template-columns:1fr;}
+  .board-grid{grid-template-columns:1fr;}
+  .n-content{padding:12px 10px 80px;}
+  .n-topbar{flex-wrap:wrap;}
+  .n-view-tabs{overflow-x:auto;flex-shrink:0;padding-bottom:2px;}
+}
+.n-sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:799;}
+.n-sidebar-overlay.show{display:block;}
+.mobile-bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:9999;background:#080c14;border-top:1px solid rgba(0,229,255,0.08);padding:8px 0 env(safe-area-inset-bottom,8px);}
+@media(max-width:768px){.mobile-bottom-nav{display:flex;}body{padding-bottom:70px;}}
+.mbn-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;text-decoration:none;color:#5a6a88;padding:4px 0;}
+.mbn-item.active{color:#00e5ff;}
+.mbn-icon{font-size:1.2rem;line-height:1;}
+.mbn-label{font-size:0.58rem;text-transform:uppercase;letter-spacing:0.05em;}
+</style>
+</head>
+<body>
+
+<!-- Overlays -->
+<div class="n-sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<div class="prop-overlay" id="propOverlay" onclick="closePropPanel()"></div>
+
+<!-- NOTION SIDEBAR -->
+<nav class="n-sidebar" id="nSidebar">
+  <div class="n-workspace">
+    <span class="n-workspace-icon">🚐</span>
+    <span class="n-workspace-name">Transport Shuttle OS</span>
+  </div>
+  <div class="n-sidebar-pages">
+    <div class="n-page-item" onclick="switchDB('home',this)"><span class="n-page-icon">🏠</span> Home</div>
+    <div class="n-page-item active" onclick="switchDB('bookings',this)" id="nav-bookings"><span class="n-page-icon">📋</span> Bookings</div>
+    <div class="n-page-item" onclick="switchDB('customers',this)"><span class="n-page-icon">👥</span> Customers</div>
+    <div class="n-page-item" onclick="switchDB('routes',this)"><span class="n-page-icon">🚐</span> Routes</div>
+    <div class="n-page-item" onclick="switchDB('revenue',this)"><span class="n-page-icon">💰</span> Revenue</div>
+    <div class="n-page-item" onclick="switchDB('bookings',this)"><span class="n-page-icon">🔧</span> Maintenance</div>
+    <div class="n-add-page"><span class="n-page-icon">➕</span> Add a page</div>
+  </div>
+  <div class="n-sidebar-footer">
+    <div class="n-sidebar-footer-text">Built by <a href="https://creativelynanda.co.za">Nanda · Mirembe Muse</a><br>Transport Shuttle OS Demo</div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="n-main">
+
+  <!-- NOTION TOP BAR -->
+  <div class="n-topbar">
+    <button class="hamburger" onclick="toggleSidebar()">☰</button>
+    <a href="index.html" class="back-link-top">← Home</a>
+    <div class="n-breadcrumb">
+      <span onclick="switchDB('bookings',document.getElementById('nav-bookings'))">Transport Shuttle OS</span>
+      <span class="sep">/</span>
+      <span id="breadcrumbCurrent" style="color:var(--n-text);">Bookings</span>
+    </div>
+    <div class="n-topbar-actions">
+      <button class="n-top-btn">Share</button>
+      <button class="n-top-btn">⋯</button>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="n-content">
+
+    <!-- ======== BOOKINGS DATABASE ======== -->
+    <div class="current-db active" id="db-bookings">
+      <div class="db-header">
+        <span class="db-emoji">📋</span>
+        <div class="db-title">Bookings</div>
+        <div class="db-sub">All shuttle bookings — scholar, airport, and corporate. Click any row to open properties.</div>
+      </div>
+
+      <div class="db-controls">
+        <div class="view-tab active cyan-tab" onclick="switchView('bookings','table',this)">☰ Table</div>
+        <div class="view-tab" onclick="switchView('bookings','board',this)">⊞ Board</div>
+        <div class="view-tab" onclick="switchView('bookings','gallery',this)">⊟ Gallery</div>
+        <div class="db-actions">
+          <button class="db-action-btn">⚡ Filter</button>
+          <button class="db-action-btn">↕ Sort</button>
+          <button class="db-action-btn">⊕ New</button>
+        </div>
+      </div>
+
+      <!-- TABLE VIEW -->
+      <div class="view-panel active" id="bookings-table">
+        <div style="overflow-x:auto;">
+          <table class="n-table">
+            <thead>
+              <tr>
+                <th>Status</th>
+                <th>Customer</th>
+                <th>Service</th>
+                <th>Route</th>
+                <th>Date</th>
+                <th>Pax</th>
+                <th>Amount</th>
+                <th>WhatsApp</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr onclick="openProp('b1')" title="Click to open properties">
+                <td><span class="s-active">🟢 Active</span></td>
+                <td><div class="n-cell-main"><span class="row-expand">↗</span>Themba Nkosi</div></td>
+                <td>Scholar</td>
+                <td>Summerstrand → Lorraine</td>
+                <td>Daily</td>
+                <td>2</td>
+                <td class="amount-cell">R2,000/mo</td>
+                <td><button class="wa-link" onclick="event.stopPropagation()">📱</button></td>
+              </tr>
+              <tr onclick="openProp('b2')" title="Click to open properties">
+                <td><span class="s-active">🟢 Active</span></td>
+                <td><div class="n-cell-main"><span class="row-expand">↗</span>Mrs. Motsepe</div></td>
+                <td>Scholar</td>
+                <td>Newton Park → St George's</td>
+                <td>Daily</td>
+                <td>3</td>
+                <td class="amount-cell">R3,000/mo</td>
+                <td><button class="wa-link" onclick="event.stopPropagation()">📱</button></td>
+              </tr>
+              <tr onclick="openProp('b3')" title="Click to open properties">
+                <td><span class="s-confirmed">🔵 Confirmed</span></td>
+                <td><div class="n-cell-main"><span class="row-expand">↗</span>Zanele Dlamini</div></td>
+                <td>Airport</td>
+                <td>PE Airport → Walmer</td>
+                <td>8 Apr</td>
+                <td>1</td>
+                <td class="amount-cell">R350</td>
+                <td><button class="wa-link" onclick="event.stopPropagation()">📱</button></td>
+              </tr>
+              <tr onclick="openProp('b4')" title="Click to open properties">
+                <td><span class="s-confirmed">🔵 Confirmed</span></td>
+                <td><div class="n-cell-main"><span class="row-expand">↗</span>Sipho Corp</div></td>
+                <td>Corporate</td>
+                <td>Boardwalk → Conference Ctr</td>
+                <td>10 Apr</td>
+                <td>14</td>
+                <td class="amount-cell">R2,500</td>
+                <td><button class="wa-link" onclick="event.stopPropagation()">📱</button></td>
+              </tr>
+              <tr onclick="openProp('b5')" title="Click to open properties">
+                <td><span class="s-pending">🟡 Pending</span></td>
+                <td><div class="n-cell-main"><span class="row-expand">↗</span>New Lead</div></td>
+                <td>Scholar</td>
+                <td>Greenacres area</td>
+                <td>TBC</td>
+                <td>2</td>
+                <td class="amount-cell">R2,000/mo</td>
+                <td><button class="wa-link" onclick="event.stopPropagation()">📱</button></td>
+              </tr>
+              <tr onclick="openProp('b6')" title="Click to open properties">
+                <td><span class="s-completed">⚫ Completed</span></td>
+                <td><div class="n-cell-main"><span class="row-expand">↗</span>Yusuf Omar</div></td>
+                <td>Airport</td>
+                <td>PE Airport → Uitenhage</td>
+                <td>2 Apr</td>
+                <td>3</td>
+                <td class="amount-cell">R600</td>
+                <td><button class="wa-link" onclick="event.stopPropagation()">📱</button></td>
+              </tr>
+              <tr onclick="openProp('b7')" title="Click to open properties">
+                <td><span class="s-active">🟢 Active</span></td>
+                <td><div class="n-cell-main"><span class="row-expand">↗</span>Nomsa Khumalo</div></td>
+                <td>Scholar</td>
+                <td>Lorraine → Collegiate</td>
+                <td>Daily</td>
+                <td>1</td>
+                <td class="amount-cell">R1,000/mo</td>
+                <td><button class="wa-link" onclick="event.stopPropagation()">📱</button></td>
+              </tr>
+              <tr onclick="openProp('b8')" title="Click to open properties">
+                <td><span class="s-confirmed">🔵 Confirmed</span></td>
+                <td><div class="n-cell-main"><span class="row-expand">↗</span>Lesedi Events</div></td>
+                <td>Corporate</td>
+                <td>Humewood → Kings Beach</td>
+                <td>12 Apr</td>
+                <td>28</td>
+                <td class="amount-cell">R4,500</td>
+                <td><button class="wa-link" onclick="event.stopPropagation()">📱</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- BOARD VIEW -->
+      <div class="view-panel" id="bookings-board">
+        <div style="overflow-x:auto;">
+          <div class="board-grid">
+            <div class="board-col">
+              <div class="board-col-title"><span class="board-count">1</span> Pending</div>
+              <div class="board-card" onclick="openProp('b5')">
+                <div class="bc-title">New Lead</div>
+                <div class="bc-sub">Greenacres area · Scholar</div>
+                <div class="bc-amount">R2,000/mo</div>
+              </div>
+            </div>
+            <div class="board-col">
+              <div class="board-col-title"><span class="board-count">3</span> Confirmed</div>
+              <div class="board-card" onclick="openProp('b3')">
+                <div class="bc-title">Zanele Dlamini</div>
+                <div class="bc-sub">PE Airport → Walmer · 8 Apr</div>
+                <div class="bc-amount">R350</div>
+              </div>
+              <div class="board-card" onclick="openProp('b4')">
+                <div class="bc-title">Sipho Corp</div>
+                <div class="bc-sub">Boardwalk → Conference · 10 Apr</div>
+                <div class="bc-amount">R2,500</div>
+              </div>
+              <div class="board-card" onclick="openProp('b8')">
+                <div class="bc-title">Lesedi Events</div>
+                <div class="bc-sub">Humewood → Kings Beach · 12 Apr</div>
+                <div class="bc-amount">R4,500</div>
+              </div>
+            </div>
+            <div class="board-col">
+              <div class="board-col-title"><span class="board-count">3</span> Active</div>
+              <div class="board-card" onclick="openProp('b1')" style="border-color:rgba(34,197,94,0.2);">
+                <div class="bc-title">Themba Nkosi</div>
+                <div class="bc-sub">Summerstrand → Lorraine · Daily</div>
+                <div class="bc-amount">R2,000/mo</div>
+              </div>
+              <div class="board-card" onclick="openProp('b2')" style="border-color:rgba(34,197,94,0.2);">
+                <div class="bc-title">Mrs. Motsepe</div>
+                <div class="bc-sub">Newton Park → St George's · Daily</div>
+                <div class="bc-amount">R3,000/mo</div>
+              </div>
+              <div class="board-card" onclick="openProp('b7')" style="border-color:rgba(34,197,94,0.2);">
+                <div class="bc-title">Nomsa Khumalo</div>
+                <div class="bc-sub">Lorraine → Collegiate · Daily</div>
+                <div class="bc-amount">R1,000/mo</div>
+              </div>
+            </div>
+            <div class="board-col">
+              <div class="board-col-title"><span class="board-count">1</span> Completed</div>
+              <div class="board-card" onclick="openProp('b6')" style="opacity:0.7;">
+                <div class="bc-title">Yusuf Omar</div>
+                <div class="bc-sub">PE Airport → Uitenhage · 2 Apr</div>
+                <div class="bc-amount">R600</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GALLERY VIEW -->
+      <div class="view-panel" id="bookings-gallery">
+        <div class="gallery-grid">
+          <div class="gallery-card" onclick="openProp('b1')">
+            <div class="gallery-card-top">🏫</div>
+            <div class="gallery-card-body">
+              <div class="gc-title">Themba Nkosi</div>
+              <div class="gc-sub">Scholar Transport · Daily</div>
+              <div class="gc-amount">R2,000/mo</div>
+              <div style="margin-top:6px;"><span class="s-active">🟢 Active</span></div>
+            </div>
+          </div>
+          <div class="gallery-card" onclick="openProp('b2')">
+            <div class="gallery-card-top">🏫</div>
+            <div class="gallery-card-body">
+              <div class="gc-title">Mrs. Motsepe</div>
+              <div class="gc-sub">Scholar Transport · Daily</div>
+              <div class="gc-amount">R3,000/mo</div>
+              <div style="margin-top:6px;"><span class="s-active">🟢 Active</span></div>
+            </div>
+          </div>
+          <div class="gallery-card" onclick="openProp('b3')">
+            <div class="gallery-card-top">✈️</div>
+            <div class="gallery-card-body">
+              <div class="gc-title">Zanele Dlamini</div>
+              <div class="gc-sub">Airport Transfer · 8 Apr</div>
+              <div class="gc-amount">R350</div>
+              <div style="margin-top:6px;"><span class="s-confirmed">🔵 Confirmed</span></div>
+            </div>
+          </div>
+          <div class="gallery-card" onclick="openProp('b4')">
+            <div class="gallery-card-top">🏢</div>
+            <div class="gallery-card-body">
+              <div class="gc-title">Sipho Corp</div>
+              <div class="gc-sub">Corporate Shuttle · 10 Apr</div>
+              <div class="gc-amount">R2,500</div>
+              <div style="margin-top:6px;"><span class="s-confirmed">🔵 Confirmed</span></div>
+            </div>
+          </div>
+          <div class="gallery-card" onclick="openProp('b5')">
+            <div class="gallery-card-top">🏫</div>
+            <div class="gallery-card-body">
+              <div class="gc-title">New Lead</div>
+              <div class="gc-sub">Scholar Transport · TBC</div>
+              <div class="gc-amount">R2,000/mo</div>
+              <div style="margin-top:6px;"><span class="s-pending">🟡 Pending</span></div>
+            </div>
+          </div>
+          <div class="gallery-card" onclick="openProp('b6')">
+            <div class="gallery-card-top">✈️</div>
+            <div class="gallery-card-body">
+              <div class="gc-title">Yusuf Omar</div>
+              <div class="gc-sub">Airport Transfer · 2 Apr</div>
+              <div class="gc-amount">R600</div>
+              <div style="margin-top:6px;"><span class="s-completed">⚫ Completed</span></div>
+            </div>
+          </div>
+          <div class="gallery-card" onclick="openProp('b7')">
+            <div class="gallery-card-top">🏫</div>
+            <div class="gallery-card-body">
+              <div class="gc-title">Nomsa Khumalo</div>
+              <div class="gc-sub">Scholar Transport · Daily</div>
+              <div class="gc-amount">R1,000/mo</div>
+              <div style="margin-top:6px;"><span class="s-active">🟢 Active</span></div>
+            </div>
+          </div>
+          <div class="gallery-card" onclick="openProp('b8')">
+            <div class="gallery-card-top">🏢</div>
+            <div class="gallery-card-body">
+              <div class="gc-title">Lesedi Events</div>
+              <div class="gc-sub">Corporate Shuttle · 12 Apr</div>
+              <div class="gc-amount">R4,500</div>
+              <div style="margin-top:6px;"><span class="s-confirmed">🔵 Confirmed</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ======== CUSTOMERS DATABASE ======== -->
+    <div class="current-db" id="db-customers">
+      <div class="db-header">
+        <span class="db-emoji">👥</span>
+        <div class="db-title">Customers</div>
+        <div class="db-sub">All clients — scholar parents, corporate accounts, and airport regulars.</div>
+      </div>
+      <div class="db-controls">
+        <div class="view-tab active cyan-tab">☰ Table</div>
+        <div class="db-actions">
+          <button class="db-action-btn">⚡ Filter</button>
+          <button class="db-action-btn">↕ Sort</button>
+          <button class="db-action-btn">⊕ New</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto;padding-top:16px;">
+        <table class="n-table">
+          <thead>
+            <tr><th>Name</th><th>Type</th><th>Trips/Month</th><th>Monthly Value</th><th>Since</th><th>LTV</th><th>WhatsApp</th></tr>
+          </thead>
+          <tbody>
+            <tr onclick="openProp('c1')">
+              <td><div class="n-cell-main"><span class="row-expand">↗</span>Themba Nkosi</div></td>
+              <td>Scholar parent</td><td>40 trips</td>
+              <td class="amount-cell">R2,000</td><td>Jan 2026</td>
+              <td class="amount-cell">R24,000</td>
+              <td><button class="wa-link" onclick="event.stopPropagation()">📱</button></td>
+            </tr>
+            <tr onclick="openProp('c2')">
+              <td><div class="n-cell-main"><span class="row-expand">↗</span>Mrs. Motsepe</div></td>
+              <td>Scholar parent</td><td>40 trips</td>
+              <td class="amount-cell">R3,000</td><td>Jan 2026</td>
+              <td class="amount-cell">R36,000</td>
+              <td><button class="wa-link" onclick="event.stopPropagation()">📱</button></td>
+            </tr>
+            <tr onclick="openProp('c3')">
+              <td><div class="n-cell-main"><span class="row-expand">↗</span>Zanele Dlamini</div></td>
+              <td>Airport VIP</td><td>2–4 trips</td>
+              <td class="amount-cell">Variable</td><td>Nov 2025</td>
+              <td class="amount-cell">R8,400</td>
+              <td><button class="wa-link" onclick="event.stopPropagation()">📱</button></td>
+            </tr>
+            <tr onclick="openProp('c4')">
+              <td><div class="n-cell-main"><span class="row-expand">↗</span>Sipho Mokoena</div></td>
+              <td>Corporate</td><td>4 events</td>
+              <td class="amount-cell">R10,000</td><td>Mar 2026</td>
+              <td class="amount-cell">R60,000</td>
+              <td><button class="wa-link" onclick="event.stopPropagation()">📱</button></td>
+            </tr>
+            <tr onclick="openProp('c5')">
+              <td><div class="n-cell-main"><span class="row-expand">↗</span>Nomsa Khumalo</div></td>
+              <td>Scholar parent</td><td>20 trips</td>
+              <td class="amount-cell">R1,000</td><td>Feb 2026</td>
+              <td class="amount-cell">R12,000</td>
+              <td><button class="wa-link" onclick="event.stopPropagation()">📱</button></td>
+            </tr>
+            <tr onclick="openProp('c6')">
+              <td><div class="n-cell-main"><span class="row-expand">↗</span>Yusuf Omar</div></td>
+              <td>Airport occasional</td><td>1–2 trips</td>
+              <td class="amount-cell">Variable</td><td>Oct 2025</td>
+              <td class="amount-cell">R3,600</td>
+              <td><button class="wa-link" onclick="event.stopPropagation()">📱</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ======== ROUTES DATABASE ======== -->
+    <div class="current-db" id="db-routes">
+      <div class="db-header">
+        <span class="db-emoji">🚐</span>
+        <div class="db-title">Routes</div>
+        <div class="db-sub">Route profitability and capacity management. Your most profitable routes at a glance.</div>
+      </div>
+      <div class="db-controls">
+        <div class="view-tab active cyan-tab">☰ Table</div>
+        <div class="db-actions">
+          <button class="db-action-btn">⚡ Filter</button>
+          <button class="db-action-btn">↕ Sort</button>
+          <button class="db-action-btn">⊕ New</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto;padding-top:16px;">
+        <table class="n-table">
+          <thead>
+            <tr><th>Route</th><th>Type</th><th>Daily Trips</th><th>Capacity</th><th>Monthly Rev.</th><th>Margin</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="n-cell-main" style="color:var(--n-text);">Summerstrand → Lorraine</div></td>
+              <td>Scholar</td><td>2 (AM+PM)</td><td>12 seats</td>
+              <td class="amount-cell">R8,000</td>
+              <td style="color:var(--green);">72%</td>
+              <td><span style="font-size:0.62rem;background:rgba(245,158,11,0.12);color:#f59e0b;padding:2px 8px;border-radius:4px;">⭐ Goldmine</span></td>
+            </tr>
+            <tr>
+              <td><div class="n-cell-main" style="color:var(--n-text);">Newton Park → Cleary Park</div></td>
+              <td>Scholar</td><td>2 (AM+PM)</td><td>10 seats</td>
+              <td class="amount-cell">R6,000</td>
+              <td style="color:var(--green);">68%</td>
+              <td><span style="font-size:0.62rem;background:rgba(245,158,11,0.12);color:#f59e0b;padding:2px 8px;border-radius:4px;">⭐ Goldmine</span></td>
+            </tr>
+            <tr>
+              <td><div class="n-cell-main" style="color:var(--n-text);">PE Airport → Walmer</div></td>
+              <td>Airport</td><td>Variable</td><td>7 seats</td>
+              <td class="amount-cell">R4,200</td>
+              <td style="color:var(--green);">58%</td>
+              <td><span style="font-size:0.62rem;background:rgba(0,229,255,0.08);color:#00e5ff;padding:2px 8px;border-radius:4px;">✓ Monitor</span></td>
+            </tr>
+            <tr>
+              <td><div class="n-cell-main" style="color:var(--n-text);">Boardwalk → Conference Ctr</div></td>
+              <td>Corporate</td><td>Per event</td><td>20 seats</td>
+              <td class="amount-cell">R2,500</td>
+              <td style="color:var(--gold);">42%</td>
+              <td><span style="font-size:0.62rem;background:rgba(255,255,255,0.06);color:#94a3b8;padding:2px 8px;border-radius:4px;">Adjust</span></td>
+            </tr>
+            <tr>
+              <td><div class="n-cell-main" style="color:var(--n-text);">Lorraine → Collegiate</div></td>
+              <td>Scholar</td><td>2 (AM+PM)</td><td>8 seats</td>
+              <td class="amount-cell">R3,000</td>
+              <td style="color:var(--green);">66%</td>
+              <td><span style="font-size:0.62rem;background:rgba(245,158,11,0.12);color:#f59e0b;padding:2px 8px;border-radius:4px;">⭐ Goldmine</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ======== REVENUE DATABASE ======== -->
+    <div class="current-db" id="db-revenue">
+      <div class="db-header">
+        <span class="db-emoji">💰</span>
+        <div class="db-title">Revenue</div>
+        <div class="db-sub">Monthly revenue broken down by service type — track growth and hit targets.</div>
+      </div>
+      <div class="db-controls">
+        <div class="view-tab active cyan-tab">☰ Table</div>
+        <div class="db-actions">
+          <button class="db-action-btn">⚡ Filter</button>
+          <button class="db-action-btn">↕ Sort</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto;padding-top:16px;">
+        <table class="n-table">
+          <thead>
+            <tr><th>Month</th><th>Scholar</th><th>Airport</th><th>Corporate</th><th>Total</th><th>vs Target</th><th>Notes</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="color:var(--n-text);font-weight:500;">Jan 2026</td>
+              <td>R12,000</td><td>R3,200</td><td>R2,500</td>
+              <td class="amount-cell">R17,700</td>
+              <td style="color:var(--gold);">−R300</td>
+              <td style="color:var(--n-muted2);">New year slow start</td>
+            </tr>
+            <tr>
+              <td style="color:var(--n-text);font-weight:500;">Feb 2026</td>
+              <td>R14,000</td><td>R2,800</td><td>R2,500</td>
+              <td class="amount-cell">R19,300</td>
+              <td style="color:var(--green);">+R1,300</td>
+              <td style="color:var(--n-muted2);">School term pickup</td>
+            </tr>
+            <tr>
+              <td style="color:var(--n-text);font-weight:500;">Mar 2026</td>
+              <td>R16,000</td><td>R3,400</td><td>R2,500</td>
+              <td class="amount-cell">R21,900</td>
+              <td style="color:var(--green);">+R1,900</td>
+              <td style="color:var(--n-muted2);">Sipho Corp onboarded</td>
+            </tr>
+            <tr>
+              <td style="color:var(--n-text);font-weight:500;">Apr 2026</td>
+              <td>R16,000</td><td>R4,200</td><td>R4,300</td>
+              <td class="amount-cell">R24,500</td>
+              <td style="color:var(--green);">+R4,500</td>
+              <td style="color:var(--n-muted2);">Events season + new corporate</td>
+            </tr>
+            <tr style="opacity:0.5;">
+              <td style="color:var(--n-text);">May 2026</td>
+              <td>—</td><td>—</td><td>—</td>
+              <td style="color:var(--n-muted);">—</td>
+              <td>—</td>
+              <td style="color:var(--n-muted2);">Target: R26,000</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ======== HOME ======== -->
+    <div class="current-db" id="db-home">
+      <div class="db-header">
+        <span class="db-emoji">🚐</span>
+        <div class="db-title">Transport Shuttle OS</div>
+        <div class="db-sub">Your complete operating workspace — bookings, customers, routes, and revenue in one place.</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px;">
+        <div style="background:var(--n-surface);border:1px solid var(--n-border);border-radius:8px;padding:20px;cursor:pointer;" onclick="switchDB('bookings',document.getElementById('nav-bookings'))">
+          <div style="font-size:1.8rem;margin-bottom:8px;">📋</div>
+          <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:var(--n-text);margin-bottom:4px;">Bookings</div>
+          <div style="font-size:0.68rem;color:var(--n-muted);">8 active bookings · 3 pending</div>
+        </div>
+        <div style="background:var(--n-surface);border:1px solid var(--n-border);border-radius:8px;padding:20px;cursor:pointer;" onclick="switchDB('customers',document.querySelector('.n-page-item:nth-child(3)'))">
+          <div style="font-size:1.8rem;margin-bottom:8px;">👥</div>
+          <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:var(--n-text);margin-bottom:4px;">Customers</div>
+          <div style="font-size:0.68rem;color:var(--n-muted);">6 clients · R141K total LTV</div>
+        </div>
+        <div style="background:var(--n-surface);border:1px solid var(--n-border);border-radius:8px;padding:20px;cursor:pointer;" onclick="switchDB('routes',document.querySelector('.n-page-item:nth-child(4)'))">
+          <div style="font-size:1.8rem;margin-bottom:8px;">🚐</div>
+          <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:var(--n-text);margin-bottom:4px;">Routes</div>
+          <div style="font-size:0.68rem;color:var(--n-muted);">5 routes · 4 goldmines</div>
+        </div>
+        <div style="background:var(--n-surface);border:1px solid var(--n-border);border-radius:8px;padding:20px;cursor:pointer;" onclick="switchDB('revenue',document.querySelector('.n-page-item:nth-child(5)'))">
+          <div style="font-size:1.8rem;margin-bottom:8px;">💰</div>
+          <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:var(--n-text);margin-bottom:4px;">Revenue</div>
+          <div style="font-size:0.68rem;color:var(--n-muted);">R24,500 this month · ↑ 27%</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- PROPERTY PANEL -->
+<div class="prop-panel" id="propPanel">
+  <div class="prop-panel-top">
+    <div>
+      <span class="prop-emoji" id="propEmoji">🏫</span>
+      <div class="prop-title" id="propTitle">Booking Details</div>
+      <div class="prop-sub" id="propSub">Scholar Transport</div>
+    </div>
+    <button class="prop-close" onclick="closePropPanel()">✕</button>
+  </div>
+  <div class="prop-body">
+    <div class="prop-section">
+      <div class="prop-section-title">Properties</div>
+      <div id="propRows"></div>
+    </div>
+    <div class="prop-section">
+      <div class="prop-section-title">Notes</div>
+      <div class="prop-notes" id="propNotes">No notes added yet.</div>
+    </div>
+    <button class="prop-wa-btn">📱 Send WhatsApp to Customer</button>
+  </div>
+</div>
+
+<!-- MOBILE BOTTOM NAV -->
+<nav class="mobile-bottom-nav">
+  <a href="index.html" class="mbn-item"><span class="mbn-icon">⌂</span><span class="mbn-label">Home</span></a>
+  <a href="proposal.html" class="mbn-item"><span class="mbn-icon">📊</span><span class="mbn-label">Proposal</span></a>
+  <a href="client-demo.html" class="mbn-item"><span class="mbn-icon">📱</span><span class="mbn-label">Demo</span></a>
+  <a href="admin.html" class="mbn-item"><span class="mbn-icon">⚡</span><span class="mbn-label">Admin</span></a>
+  <a href="notion.html" class="mbn-item active"><span class="mbn-icon">🗂️</span><span class="mbn-label">Notion</span></a>
+</nav>
+
+<script>
+// ── PROPERTY DATA ──
+const propData = {
+  b1: { emoji:'🏫', title:'Themba Nkosi — Scholar Transport', sub:'#TS-2026-0112 · Active booking',
+    rows:[['Status','🟢 Active'],['Service','Scholar Transport'],['Children','2'],['Route','Summerstrand → Lorraine'],['Schedule','Daily — Mon to Fri'],['Pickup time','7:00 AM'],['Monthly rate','R2,000'],['Deposit paid','R500 ✓'],['WhatsApp','+27 83 444 5678'],['Since','9 Jan 2026']],
+    notes:'Themba is punctual with payments. Children are well-behaved. Prefers 7:00 AM pickup exactly. Has referred 2 other parents.'
+  },
+  b2: { emoji:'🏫', title:'Mrs. Motsepe — Scholar Transport', sub:'#TS-2026-0118 · Active booking',
+    rows:[['Status','🟢 Active'],['Service','Scholar Transport'],['Children','3'],['Route','Newton Park → St George\'s'],['Schedule','Daily — Mon to Fri'],['Pickup time','7:15 AM'],['Monthly rate','R3,000'],['Deposit paid','R750 ✓'],['WhatsApp','+27 82 333 1122']],
+    notes:'Mrs. Motsepe joined on referral from Themba Nkosi. Pays on time. Has asked about afternoon pickup.'
+  },
+  b3: { emoji:'✈️', title:'Zanele Dlamini — Airport Transfer', sub:'#TS-2026-0203 · Confirmed',
+    rows:[['Status','🔵 Confirmed'],['Service','Airport Transfer'],['Route','PE Airport → Walmer'],['Date','8 Apr 2026 · 14:30'],['Passengers','1'],['Amount','R350'],['Payment','Paid in full'],['WhatsApp','+27 71 888 9900']],
+    notes:'Zanele is a VIP client — frequent flyer, always tips the driver. Has Uber Black expectations. Give priority service.'
+  },
+  b4: { emoji:'🏢', title:'Sipho Corp — Corporate Shuttle', sub:'#TS-2026-0301 · Confirmed',
+    rows:[['Status','🔵 Confirmed'],['Service','Corporate Shuttle'],['Route','Boardwalk → Conference Ctr'],['Date','10 Apr 2026 · 08:00'],['Passengers','14'],['Amount','R2,500'],['Payment','Invoice sent'],['Contact','Sipho Mokoena · 073 555 4400']],
+    notes:'Large corporate account — potential recurring monthly events. Follow up after this event to lock in retainer.'
+  },
+  b5: { emoji:'🏫', title:'New Lead — Scholar Transport', sub:'#TS-2026-PENDING · Awaiting confirmation',
+    rows:[['Status','🟡 Pending'],['Service','Scholar Transport'],['Route','Greenacres area'],['Date','TBC'],['Children','2'],['Estimated rate','R2,000/mo'],['Lead source','Facebook group'],['Follow-up','Call by Tue 8 Apr']],
+    notes:'Parent expressed interest in Facebook group. Has 2 children at Greenacres Primary. Competing with another shuttle. Needs to be called by Tuesday.'
+  },
+  b6: { emoji:'✈️', title:'Yusuf Omar — Airport Transfer', sub:'#TS-2026-0115 · Completed',
+    rows:[['Status','⚫ Completed'],['Service','Airport Transfer'],['Route','PE Airport → Uitenhage'],['Date','2 Apr 2026'],['Passengers','3'],['Amount','R600'],['Review','5★ Google review left'],['WhatsApp','+27 83 222 7744']],
+    notes:'Great customer. Left a 5-star review. Will use again for Cape Town trip in May. Keep on priority list.'
+  },
+  b7: { emoji:'🏫', title:'Nomsa Khumalo — Scholar Transport', sub:'#TS-2026-0208 · Active booking',
+    rows:[['Status','🟢 Active'],['Service','Scholar Transport'],['Children','1'],['Route','Lorraine → Collegiate'],['Schedule','Daily — Mon to Fri'],['Pickup time','7:00 AM'],['Monthly rate','R1,000'],['Deposit paid','R250 ✓']],
+    notes:'Nomsa is a single parent — very appreciative of the service. Has asked about afternoon pick-up as well. Consider upsell.'
+  },
+  b8: { emoji:'🏢', title:'Lesedi Events — Corporate Shuttle', sub:'#TS-2026-0310 · Confirmed',
+    rows:[['Status','🔵 Confirmed'],['Service','Corporate Shuttle'],['Route','Humewood → Kings Beach'],['Date','12 Apr 2026'],['Passengers','28'],['Amount','R4,500'],['Vehicles required','3 × minibuses'],['Contact','Lesedi · 082 777 3344']],
+    notes:'Large event booking — biggest single booking this month. Need to subcontract 1 extra vehicle. Confirm vehicle availability by 9 Apr.'
+  },
+  c1: { emoji:'👥', title:'Themba Nkosi', sub:'Scholar parent · Active client',
+    rows:[['Type','Scholar parent'],['Children','2'],['Monthly value','R2,000'],['Trips/month','~40'],['Since','Jan 2026'],['LTV (12mo)','R24,000'],['WhatsApp','+27 83 444 5678'],['Google review','5★ ✓']],
+    notes:'Referred 2 other parents. Very satisfied with service. Consider referral incentive program.'
+  },
+  c2: { emoji:'👥', title:'Mrs. Motsepe', sub:'Scholar parent · Active client',
+    rows:[['Type','Scholar parent'],['Children','3'],['Monthly value','R3,000'],['Since','Jan 2026'],['LTV (12mo)','R36,000'],['WhatsApp','+27 82 333 1122']],
+    notes:'Joined on referral. Highest-value scholar client. Has asked about afternoon trips — potential R500/mo upsell.'
+  },
+  c3: { emoji:'👥', title:'Zanele Dlamini', sub:'Airport VIP · Frequent flyer',
+    rows:[['Type','Airport VIP'],['Trips/month','2–4'],['Monthly value','Variable'],['Since','Nov 2025'],['LTV (12mo)','R8,400'],['WhatsApp','+27 71 888 9900']],
+    notes:'High-value occasional client. Always tips. Prefers early morning transfers. Give VIP treatment every time.'
+  },
+  c4: { emoji:'👥', title:'Sipho Mokoena', sub:'Corporate · High-value account',
+    rows:[['Type','Corporate events'],['Events/month','~4'],['Per event','R2,500'],['Monthly value','R10,000'],['Since','Mar 2026'],['LTV (12mo)','R60,000']],
+    notes:'Biggest client by LTV. Has hinted at monthly retainer. Schedule a retainer meeting before end of April.'
+  },
+  c5: { emoji:'👥', title:'Nomsa Khumalo', sub:'Scholar parent · Active client',
+    rows:[['Type','Scholar parent'],['Children','1'],['Monthly value','R1,000'],['Since','Feb 2026'],['LTV (12mo)','R12,000'],['WhatsApp','+27 84 111 2233']],
+    notes:'Single parent, very grateful for the service. Follow up about afternoon pickup — potential R500/mo add-on.'
+  },
+  c6: { emoji:'👥', title:'Yusuf Omar', sub:'Airport occasional client',
+    rows:[['Type','Airport occasional'],['Trips/month','1–2'],['Monthly value','Variable'],['Since','Oct 2025'],['LTV (12mo)','R3,600']],
+    notes:'Has a Cape Town trip planned in May. Reach out to book early and secure the fare.'
+  },
+};
+
+// ── DB SWITCHER ──
+const dbNames = { bookings:'Bookings', customers:'Customers', routes:'Routes', revenue:'Revenue', home:'Home' };
+
+function switchDB(name, navEl) {
+  document.querySelectorAll('.current-db').forEach(d => d.classList.remove('active'));
+  document.querySelectorAll('.n-page-item').forEach(n => n.classList.remove('active'));
+  const db = document.getElementById('db-' + name);
+  if (db) db.classList.add('active');
+  if (navEl) navEl.classList.add('active');
+  document.getElementById('breadcrumbCurrent').textContent = dbNames[name] || name;
+  closeSidebar();
+  closePropPanel();
+}
+
+// ── VIEW SWITCHER ──
+function switchView(db, view, tab) {
+  const dbEl = document.getElementById('db-' + db);
+  dbEl.querySelectorAll('.view-tab').forEach(t => { t.classList.remove('active','cyan-tab'); });
+  tab.classList.add('active','cyan-tab');
+  dbEl.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+  const panel = document.getElementById(db + '-' + view);
+  if (panel) panel.classList.add('active');
+}
+
+// ── PROPERTY PANEL ──
+function openProp(id) {
+  const data = propData[id];
+  if (!data) return;
+  document.getElementById('propEmoji').textContent = data.emoji;
+  document.getElementById('propTitle').textContent = data.title;
+  document.getElementById('propSub').textContent = data.sub;
+  const rowsEl = document.getElementById('propRows');
+  rowsEl.innerHTML = data.rows.map(([k,v]) =>
+    `<div class="prop-row"><div class="prop-key">${k}</div><div class="prop-val">${v}</div></div>`
+  ).join('');
+  document.getElementById('propNotes').textContent = data.notes || 'No notes.';
+  document.getElementById('propPanel').classList.add('open');
+  document.getElementById('propOverlay').classList.add('show');
+}
+
+function closePropPanel() {
+  document.getElementById('propPanel').classList.remove('open');
+  document.getElementById('propOverlay').classList.remove('show');
+}
+
+// ── SIDEBAR TOGGLE ──
+function toggleSidebar() {
+  document.getElementById('nSidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('show');
+}
+function closeSidebar() {
+  document.getElementById('nSidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('show');
+}
+</script>
+</body>
+</html>
